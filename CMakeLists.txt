@@ -27,8 +27,8 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
 # Define the project name
-project(can_trial_project
-    VERSION 1.0.0
+project(can_trial
+    VERSION 2.0.0
     DESCRIPTION "Study CAN communication"
     LANGUAGES CXX C ASM
 )
@@ -40,4 +40,22 @@ pico_sdk_init()
 add_subdirectory(my_stdlib)         # Common definition
 add_subdirectory(hardware_driver)   # Operate the hardware
 add_subdirectory(free_rtos)         # FreeRTOS
-add_subdirectory(appl)              # Application
+
+add_executable(can_trial ${CMAKE_CURRENT_LIST_DIR}/main.c)
+
+# Add the standard library to the build
+target_link_libraries(can_trial
+  # FreeRTOS
+  PRIVATE free_rtos
+  # Driver
+  PRIVATE hardware_driver
+)
+
+pico_set_program_name(can_trial "can_trial")
+pico_set_program_version(can_trial "1.0.0")
+
+# Modify the below lines to enable/disable output over UART/USB
+pico_enable_stdio_uart(can_trial 1)
+pico_enable_stdio_usb(can_trial 0)
+
+pico_add_extra_outputs(can_trial)
