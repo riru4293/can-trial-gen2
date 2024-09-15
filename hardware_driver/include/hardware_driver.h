@@ -10,13 +10,13 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef void (*HWDRV_CAN_IRQ_CALLBACK_T)( void );
+typedef void (*can_irq_callback_t)( void );
 
-typedef enum
+typedef enum en_can_rx
 {
-    hwdrv_can_rx1,
-    hwdrv_can_rx2
-} EN_HWDRV_CAN_RX;
+    E_CAN_RX1,
+    E_CAN_RX2
+} can_rx_t;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
@@ -25,7 +25,7 @@ void hwdrv_init_hardware( void );
 void hwdrv_light_led_1( const bool lit );
 void hwdrv_reset_can_controller( void );
 void hwdrv_begin_can_communication( void );
-void hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback );
+void hwdrv_set_can_irq_callback( const can_irq_callback_t callback );
 void hwdrv_enable_can_irq( const bool enabled );
-void hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, can_frame_t *p_msg );
+void hwdrv_get_can_msg( const can_rx_t can_rx, can_frame_t *p_msg );
 #endif /* HARDWARE_DRIVER_H */

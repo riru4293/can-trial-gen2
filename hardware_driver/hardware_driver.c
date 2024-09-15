@@ -31,7 +31,7 @@ void hwdrv_reset_can_controller( void )
     mcp2515_reset();
 }
 
-void hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback )
+void hwdrv_set_can_irq_callback( const can_irq_callback_t callback )
 {
     rp2040_set_can_irq_callback( callback );
 }
@@ -46,7 +46,7 @@ void hwdrv_begin_can_communication( void )
     mcp2515_begin_communication();
 }
 
-void hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, can_frame_t *p_msg )
+void hwdrv_get_can_msg( const can_rx_t can_rx, can_frame_t *p_msg )
 {
     mcp2515_get_can_msg( can_rx, p_msg );
 }

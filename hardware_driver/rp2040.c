@@ -78,7 +78,7 @@ static void irq_callback( const uint gpio, const uint32_t events );
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
-static HWDRV_CAN_IRQ_CALLBACK_T g_can_irq_callback = NULL;
+static can_irq_callback_t g_can_irq_callback = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
@@ -111,7 +111,7 @@ void rp2040_light_led_1( const bool lit )
     gpio_put( LED_1_PORT, lv );
 }
 
-void rp2040_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback )
+void rp2040_set_can_irq_callback( const can_irq_callback_t const callback )
 {
     g_can_irq_callback = callback;
 }

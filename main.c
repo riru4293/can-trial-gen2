@@ -39,7 +39,7 @@ int main( void )
     // vTaskStartScheduler();
 
     while ( true ) {
-        hwdrv_get_can_msg( hwdrv_can_rx1, &msg );
+        hwdrv_get_can_msg( E_CAN_RX1, &msg );
 
         printf("CANID:%03Xh %02X %02X %02X %02X %02X %02X %02X %02X\n", msg.id,
             msg.data[0],
