@@ -45,3 +45,8 @@ VOID hwdrv_begin_can_communication( VOID )
 {
     mcp2515_begin_communication();
 }
+
+VOID hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg )
+{
+    mcp2515_get_can_msg( can_rx, p_msg );
+}

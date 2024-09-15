@@ -3,11 +3,18 @@
 
 /* My standard library */
 #include <my_types.h>
+#include <can.h>
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
 typedef VOID (*HWDRV_CAN_IRQ_CALLBACK_T)( VOID );
+
+typedef enum
+{
+    hwdrv_can_rx1,
+    hwdrv_can_rx2
+} EN_HWDRV_CAN_RX;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
@@ -18,5 +25,5 @@ VOID hwdrv_reset_can_controller( VOID );
 VOID hwdrv_begin_can_communication( VOID );
 VOID hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback );
 VOID hwdrv_enable_can_irq( const BOOL enabled );
-
+VOID hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg );
 #endif /* HARDWARE_DRIVER_H */

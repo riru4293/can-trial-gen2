@@ -11,5 +11,6 @@
 /* -------------------------------------------------------------------------- */
 VOID mcp2515_reset( VOID );
 VOID mcp2515_begin_communication( VOID );
+VOID mcp2515_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg );
 
 #endif /* MCP2515_H */

@@ -1,6 +1,9 @@
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
+/* System */
+#include <string.h>
+
 /* Driver */
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
@@ -180,17 +183,25 @@
 #define MASKOF_RXB0CTRL_BUKT            ( (UINT8)0x04U )
 #define MASKOF_RXB0CTRL_FILHIT          ( (UINT8)0x01U )
 #define MASKOF_RXB1CTRL_FILHIT          ( (UINT8)0x07U )
+#define MASKOF_SIDH_CANID               ( (UINT8)0XFFU )
+#define MASKOF_SIDL_CANID               ( (UINT8)0XE0U )
 #define MASKOF_SIDL_IDE                 ( (UINT8)0x08U )
 #define MASKOF_RTR                      ( (UINT8)0x40U )
 #define MASKOF_DLC                      ( (UINT8)0x0FU )
 
 /* MCP2515 operation mode */
-#define OPMOD_NORMAL                   ( (UINT8)0x00U )
-#define OPMOD_SLEEP                    ( (UINT8)0x20U )
-#define OPMOD_LOOPBACK                 ( (UINT8)0x40U )
-#define OPMOD_LISTENONLY               ( (UINT8)0x60U )
-#define OPMOD_CONFIG                   ( (UINT8)0x80U )
+#define OPMOD_NORMAL                    ( (UINT8)0x00U )
+#define OPMOD_SLEEP                     ( (UINT8)0x20U )
+#define OPMOD_LOOPBACK                  ( (UINT8)0x40U )
+#define OPMOD_LISTENONLY                ( (UINT8)0x60U )
+#define OPMOD_CONFIG                    ( (UINT8)0x80U )
 
+#define CAN_HDR_SIDH                    ( (UINT8)0U )
+#define CAN_HDR_SIDL                    ( (UINT8)1U )
+#define CAN_HDR_EID8                    ( (UINT8)2U )
+#define CAN_HDR_EID0                    ( (UINT8)3U )
+#define CAN_HDR_DLC                     ( (UINT8)4U )
+#define CAN_HDR_LEN                     ( (UINT8)5U )
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -211,6 +222,7 @@ static VOID wait_until_change_opmod( const UINT8 expect_opmod );
 static UINT8 get_opmod( VOID );
 static VOID set_opmod( const UINT8 opmod );
 static VOID wakeup( VOID );
+static UINT32 build_std_canid( const SIZE_T len, UINT8 *p_hdr );
 
 VOID mcp2515_reset( VOID )
 {
@@ -423,4 +435,46 @@ static VOID wakeup( VOID )
 
     /* Clear wake up IRQ */
     modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
+}
+
+VOID mcp2515_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg )
+{
+    UINT8 hdr[ CAN_HDR_LEN ] = { 0U };
+    UINT8 msg[ CAN_MSG_LEN ] = { 0U };
+    UINT32 can_id;
+
+    UINT8 tttt;
+
+    tttt = read_reg( REG_RXB0D0 );
+    tttt = 0U;
+
+    /* Read CAN header from register. */
+    begin_spi();
+    write_spi( SPICMD_READ_RX0_HDR );
+    read_spi_array( CAN_HDR_LEN, hdr );
+    end_spi();
+
+    can_id = build_std_canid( CAN_HDR_LEN, hdr );
+
+    begin_spi();
+    write_spi( SPICMD_READ_RX0_BODY );
+    read_spi_array( CAN_MSG_LEN, msg );
+    end_spi();
+
+
+    p_msg->can_id = can_id;
+    memcpy( p_msg->can_msg, msg, CAN_MSG_LEN );
+
+    /* Clear interruption by received. */
+    write_reg( REG_CANINTF, REG_VAL_00 );
+}
+
+static UINT32 build_std_canid( const SIZE_T len, UINT8 *p_hdr ) {
+#define SIDH_CANID_OFFSET ( (UINT8)3U )
+#define SIDL_CANID_OFFSET ( (UINT8)5U )
+
+    return (UINT32)(
+        (UINT16)( (UINT16)p_hdr[ CAN_HDR_SIDH ] << SIDH_CANID_OFFSET )
+      | (UINT16)( (UINT8)( p_hdr[ CAN_HDR_SIDL ] & MASKOF_SIDL_CANID ) >> SIDL_CANID_OFFSET )
+    );
 }
