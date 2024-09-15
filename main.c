@@ -19,6 +19,8 @@ INT main( VOID )
 {
     hwdrv_init_hardware();
 
+    hwdrv_reset_can_controller();
+
     vTaskStartScheduler();
 
     while ( TRUE ) {
