@@ -212,7 +212,7 @@ static UINT8 get_opmod( VOID );
 static VOID set_opmod( const UINT8 opmod );
 static VOID wakeup( VOID );
 
-ERR_CD_T mcp2515_reset( VOID )
+VOID mcp2515_reset( VOID )
 {
     /* Execute reset command */
     exec_cmd_reset();
@@ -229,7 +229,7 @@ ERR_CD_T mcp2515_reset( VOID )
 
     /* 受信バッファ２設定。フィルタ一致のみ受信。 */
     //configure_rx_2_filter
-     write_reg( REG_RXB1CTRL, 0x00 );
+    write_reg( REG_RXB1CTRL, 0x00 );
 }
 
 /* -------------------------------------------------------------------------- */

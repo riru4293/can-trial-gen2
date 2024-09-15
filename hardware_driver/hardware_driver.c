@@ -26,9 +26,9 @@ VOID hwdrv_light_led_1( const BOOL lit )
     rp2040_light_led_1( lit );
 }
 
-ERR_CD_T hwdrv_reset_can_controller( VOID )
+VOID hwdrv_reset_can_controller( VOID )
 {
-    return mcp2515_reset();
+    mcp2515_reset();
 }
 
 VOID hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback )
