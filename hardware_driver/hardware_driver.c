@@ -40,3 +40,8 @@ VOID hwdrv_enable_can_irq( const BOOL enabled )
 {
     rp2040_enable_can_irq( enabled );
 }
+
+VOID hwdrv_begin_can_communication( VOID )
+{
+    mcp2515_begin_communication();
+}

@@ -21,6 +21,8 @@ INT main( VOID )
 
     hwdrv_reset_can_controller();
 
+    hwdrv_begin_can_communication();
+
     vTaskStartScheduler();
 
     while ( TRUE ) {

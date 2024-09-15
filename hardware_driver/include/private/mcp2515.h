@@ -10,5 +10,6 @@
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
 VOID mcp2515_reset( VOID );
+VOID mcp2515_begin_communication( VOID );
 
 #endif /* MCP2515_H */

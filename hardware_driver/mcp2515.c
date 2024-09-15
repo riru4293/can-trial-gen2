@@ -232,6 +232,11 @@ VOID mcp2515_reset( VOID )
     write_reg( REG_RXB1CTRL, 0x00 );
 }
 
+VOID mcp2515_begin_communication( VOID )
+{
+    set_opmod( OPMOD_NORMAL );
+}
+
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
