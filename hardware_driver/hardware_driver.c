@@ -9,7 +9,7 @@
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
 
-VOID hwdrv_init_hardware( VOID )
+void hwdrv_init_hardware( void )
 {
     /* Initialize standard I/O */
     stdio_init_all();
@@ -21,32 +21,32 @@ VOID hwdrv_init_hardware( VOID )
     rp2040_init_spi_1_hw();
 }
 
-VOID hwdrv_light_led_1( const BOOL lit )
+void hwdrv_light_led_1( const bool lit )
 {
     rp2040_light_led_1( lit );
 }
 
-VOID hwdrv_reset_can_controller( VOID )
+void hwdrv_reset_can_controller( void )
 {
     mcp2515_reset();
 }
 
-VOID hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback )
+void hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback )
 {
     rp2040_set_can_irq_callback( callback );
 }
 
-VOID hwdrv_enable_can_irq( const BOOL enabled )
+void hwdrv_enable_can_irq( const bool enabled )
 {
     rp2040_enable_can_irq( enabled );
 }
 
-VOID hwdrv_begin_can_communication( VOID )
+void hwdrv_begin_can_communication( void )
 {
     mcp2515_begin_communication();
 }
 
-VOID hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg )
+void hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, can_frame_t *p_msg )
 {
     mcp2515_get_can_msg( can_rx, p_msg );
 }

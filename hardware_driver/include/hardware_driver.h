@@ -1,14 +1,16 @@
 #ifndef HARDWARE_DRIVER_H
 #define HARDWARE_DRIVER_H
 
+/* RP2040 */
+#include <pico/types.h>
+
 /* My standard library */
-#include <my_types.h>
-#include <can.h>
+#include <my_can.h>
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef VOID (*HWDRV_CAN_IRQ_CALLBACK_T)( VOID );
+typedef void (*HWDRV_CAN_IRQ_CALLBACK_T)( void );
 
 typedef enum
 {
@@ -19,11 +21,11 @@ typedef enum
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-VOID hwdrv_init_hardware( VOID );
-VOID hwdrv_light_led_1( const BOOL lit );
-VOID hwdrv_reset_can_controller( VOID );
-VOID hwdrv_begin_can_communication( VOID );
-VOID hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback );
-VOID hwdrv_enable_can_irq( const BOOL enabled );
-VOID hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, ST_CAN_MSG *p_msg );
+void hwdrv_init_hardware( void );
+void hwdrv_light_led_1( const bool lit );
+void hwdrv_reset_can_controller( void );
+void hwdrv_begin_can_communication( void );
+void hwdrv_set_can_irq_callback( const HWDRV_CAN_IRQ_CALLBACK_T const callback );
+void hwdrv_enable_can_irq( const bool enabled );
+void hwdrv_get_can_msg( const EN_HWDRV_CAN_RX can_rx, can_frame_t *p_msg );
 #endif /* HARDWARE_DRIVER_H */
