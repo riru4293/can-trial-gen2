@@ -7,188 +7,12 @@
 /* Driver */
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
+#include <private/mcp2515_spicmd.h>
+#include <private/mcp2515_register.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
-/* SPI command */
-#define SPICMD_WRITE_REG                ( (uint8_t)0x02U )
-#define SPICMD_READ_REG                 ( (uint8_t)0x03U )
-#define SPICMD_MODBITS_REG              ( (uint8_t)0x05U )
-#define SPICMD_WRITE_TX0_ID             ( (uint8_t)0x40U )
-#define SPICMD_WRITE_TX0_CONTENT        ( (uint8_t)0x41U )
-#define SPICMD_WRITE_TX1_ID             ( (uint8_t)0x42U )
-#define SPICMD_WRITE_TX1_CONTENT        ( (uint8_t)0x43U )
-#define SPICMD_WRITE_TX2_ID             ( (uint8_t)0x44U )
-#define SPICMD_WRITE_TX2_CONTENT        ( (uint8_t)0x45U )
-#define SPICMD_REQ_TX0                  ( (uint8_t)0x81U )
-#define SPICMD_REQ_TX1                  ( (uint8_t)0x82U )
-#define SPICMD_REQ_TX2                  ( (uint8_t)0x83U )
-#define SPICMD_READ_RX0_HDR             ( (uint8_t)0x90U )
-#define SPICMD_READ_RX0_BODY            ( (uint8_t)0x92U )
-#define SPICMD_READ_RX1_HDR             ( (uint8_t)0x94U )
-#define SPICMD_READ_RX1_BODY            ( (uint8_t)0x96U )
-#define SPICMD_READ_STAT                ( (uint8_t)0xA0U )
-#define SPICMD_READ_RXSTAT              ( (uint8_t)0xB0U )
-#define SPICMD_RESET                    ( (uint8_t)0xC0U )
-
-/* Register */
-#define REG_RXF0SIDH                    ( (uint8_t)0x00U )
-#define REG_RXF0SIDL                    ( (uint8_t)0x01U )
-#define REG_RXF0EID8                    ( (uint8_t)0x02U )
-#define REG_RXF0EID0                    ( (uint8_t)0x03U )
-#define REG_RXF1SIDH                    ( (uint8_t)0x04U )
-#define REG_RXF1SIDL                    ( (uint8_t)0x05U )
-#define REG_RXF1EID8                    ( (uint8_t)0x06U )
-#define REG_RXF1EID0                    ( (uint8_t)0x07U )
-#define REG_RXF2SIDH                    ( (uint8_t)0x08U )
-#define REG_RXF2SIDL                    ( (uint8_t)0x09U )
-#define REG_RXF2EID8                    ( (uint8_t)0x0AU )
-#define REG_RXF2EID0                    ( (uint8_t)0x0BU )
-#define REG_BFPCTRL                     ( (uint8_t)0x0CU )
-#define REG_TXRTSCTRL                   ( (uint8_t)0x0DU )
-#define REG_CANSTAT                     ( (uint8_t)0x0EU )
-#define REG_CANCTRL                     ( (uint8_t)0x0FU )
-#define REG_RXF3SIDH                    ( (uint8_t)0x10U )
-#define REG_RXF3SIDL                    ( (uint8_t)0x11U )
-#define REG_RXF3EID8                    ( (uint8_t)0x12U )
-#define REG_RXF3EID0                    ( (uint8_t)0x13U )
-#define REG_RXF4SIDH                    ( (uint8_t)0x14U )
-#define REG_RXF4SIDL                    ( (uint8_t)0x15U )
-#define REG_RXF4EID8                    ( (uint8_t)0x16U )
-#define REG_RXF4EID0                    ( (uint8_t)0x17U )
-#define REG_RXF5SIDH                    ( (uint8_t)0x18U )
-#define REG_RXF5SIDL                    ( (uint8_t)0x19U )
-#define REG_RXF5EID8                    ( (uint8_t)0x1AU )
-#define REG_RXF5EID0                    ( (uint8_t)0x1BU )
-#define REG_TEC                         ( (uint8_t)0x1CU )
-#define REG_REC                         ( (uint8_t)0x1DU )
-#define REG_RXM0SIDH                    ( (uint8_t)0x20U )
-#define REG_RXM0SIDL                    ( (uint8_t)0x21U )
-#define REG_RXM0EID8                    ( (uint8_t)0x22U )
-#define REG_RXM0EID0                    ( (uint8_t)0x23U )
-#define REG_RXM1SIDH                    ( (uint8_t)0x24U )
-#define REG_RXM1SIDL                    ( (uint8_t)0x25U )
-#define REG_RXM1EID8                    ( (uint8_t)0x26U )
-#define REG_RXM1EID0                    ( (uint8_t)0x27U )
-#define REG_CNF3                        ( (uint8_t)0x28U )
-#define REG_CNF2                        ( (uint8_t)0x29U )
-#define REG_CNF1                        ( (uint8_t)0x2AU )
-#define REG_CANINTE                     ( (uint8_t)0x2BU )
-#define REG_CANINTF                     ( (uint8_t)0x2CU )
-#define REG_EFLG                        ( (uint8_t)0x2DU )
-#define REG_TXB0CTRL                    ( (uint8_t)0x30U )
-#define REG_TXB0SIDH                    ( (uint8_t)0x31U )
-#define REG_TXB0SIDL                    ( (uint8_t)0x32U )
-#define REG_TXB0EID8                    ( (uint8_t)0x33U )
-#define REG_TXB0EID0                    ( (uint8_t)0x34U )
-#define REG_TXB0DLC                     ( (uint8_t)0x35U )
-#define REG_TXB0D0                      ( (uint8_t)0x36U )
-#define REG_TXB0D1                      ( (uint8_t)0x37U )
-#define REG_TXB0D2                      ( (uint8_t)0x38U )
-#define REG_TXB0D3                      ( (uint8_t)0x39U )
-#define REG_TXB0D4                      ( (uint8_t)0x3AU )
-#define REG_TXB0D5                      ( (uint8_t)0x3BU )
-#define REG_TXB0D6                      ( (uint8_t)0x3CU )
-#define REG_TXB0D7                      ( (uint8_t)0x3DU )
-#define REG_TXB1CTRL                    ( (uint8_t)0x40U )
-#define REG_TXB1SIDH                    ( (uint8_t)0x41U )
-#define REG_TXB1SIDL                    ( (uint8_t)0x42U )
-#define REG_TXB1EID8                    ( (uint8_t)0x43U )
-#define REG_TXB1EID0                    ( (uint8_t)0x44U )
-#define REG_TXB1DLC                     ( (uint8_t)0x45U )
-#define REG_TXB1D0                      ( (uint8_t)0x46U )
-#define REG_TXB1D1                      ( (uint8_t)0x47U )
-#define REG_TXB1D2                      ( (uint8_t)0x48U )
-#define REG_TXB1D3                      ( (uint8_t)0x49U )
-#define REG_TXB1D4                      ( (uint8_t)0x4AU )
-#define REG_TXB1D5                      ( (uint8_t)0x4BU )
-#define REG_TXB1D6                      ( (uint8_t)0x4CU )
-#define REG_TXB1D7                      ( (uint8_t)0x4DU )
-#define REG_TXB2CTRL                    ( (uint8_t)0x50U )
-#define REG_TXB2SIDH                    ( (uint8_t)0x51U )
-#define REG_TXB2SIDL                    ( (uint8_t)0x52U )
-#define REG_TXB2EID8                    ( (uint8_t)0x53U )
-#define REG_TXB2EID0                    ( (uint8_t)0x54U )
-#define REG_TXB2DLC                     ( (uint8_t)0x55U )
-#define REG_TXB2D0                      ( (uint8_t)0x56U )
-#define REG_TXB2D1                      ( (uint8_t)0x57U )
-#define REG_TXB2D2                      ( (uint8_t)0x58U )
-#define REG_TXB2D3                      ( (uint8_t)0x59U )
-#define REG_TXB2D4                      ( (uint8_t)0x5AU )
-#define REG_TXB2D5                      ( (uint8_t)0x5BU )
-#define REG_TXB2D6                      ( (uint8_t)0x5CU )
-#define REG_TXB2D7                      ( (uint8_t)0x5DU )
-#define REG_RXB0CTRL                    ( (uint8_t)0x60U )
-#define REG_RXB0SIDH                    ( (uint8_t)0x61U )
-#define REG_RXB0SIDL                    ( (uint8_t)0x62U )
-#define REG_RXB0EID8                    ( (uint8_t)0x63U )
-#define REG_RXB0EID0                    ( (uint8_t)0x64U )
-#define REG_RXB0DLC                     ( (uint8_t)0x65U )
-#define REG_RXB0D0                      ( (uint8_t)0x66U )
-#define REG_RXB0D1                      ( (uint8_t)0x67U )
-#define REG_RXB0D2                      ( (uint8_t)0x68U )
-#define REG_RXB0D3                      ( (uint8_t)0x69U )
-#define REG_RXB0D4                      ( (uint8_t)0x6AU )
-#define REG_RXB0D5                      ( (uint8_t)0x6BU )
-#define REG_RXB0D6                      ( (uint8_t)0x6CU )
-#define REG_RXB0D7                      ( (uint8_t)0x6DU )
-#define REG_RXB1CTRL                    ( (uint8_t)0x70U )
-#define REG_RXB1SIDH                    ( (uint8_t)0x71U )
-#define REG_RXB1SIDL                    ( (uint8_t)0x72U )
-#define REG_RXB1EID8                    ( (uint8_t)0x73U )
-#define REG_RXB1EID0                    ( (uint8_t)0x74U )
-#define REG_RXB1DLC                     ( (uint8_t)0x75U )
-#define REG_RXB1D0                      ( (uint8_t)0x76U )
-#define REG_RXB1D1                      ( (uint8_t)0x77U )
-#define REG_RXB1D2                      ( (uint8_t)0x78U )
-#define REG_RXB1D3                      ( (uint8_t)0x79U )
-#define REG_RXB1D4                      ( (uint8_t)0x7AU )
-#define REG_RXB1D5                      ( (uint8_t)0x7BU )
-#define REG_RXB1D6                      ( (uint8_t)0x7CU )
-#define REG_RXB1D7                      ( (uint8_t)0x7DU )
-
-/* Register value */
-#define REG_VAL_00                      ( (uint8_t)0x00U )
-#define REG_VAL_FF                      ( (uint8_t)0xFFU )
-
-/* Mask of the register value */
-#define MASKOF_OPMOD                    ( (uint8_t)0xE0U )
-#define MASKOF_CANSTAT_ICOD             ( (uint8_t)0x0EU )
-#define MASKOF_CANCTRL_ABAT             ( (uint8_t)0x10U )
-#define MASKOF_CANCTRL_OSM              ( (uint8_t)0x08U )
-#define MASKOF_CANINT_MERRF             ( (uint8_t)0x80U )
-#define MASKOF_CANINT_WAKIF             ( (uint8_t)0x40U )
-#define MASKOF_CANINT_ERRIF             ( (uint8_t)0x20U )
-#define MASKOF_CANINT_TX2IF             ( (uint8_t)0x10U )
-#define MASKOF_CANINT_TX1IF             ( (uint8_t)0x08U )
-#define MASKOF_CANINT_TX0IF             ( (uint8_t)0x04U )
-#define MASKOF_CANINT_RX1IF             ( (uint8_t)0x02U )
-#define MASKOF_CANINT_RX0IF             ( (uint8_t)0x01U )
-#define MASKOF_EFLG_RX1OVR              ( (uint8_t)0x80U )
-#define MASKOF_EFLG_RX0OVR              ( (uint8_t)0x40U )
-#define MASKOF_EFLG_TXBO                ( (uint8_t)0x20U )
-#define MASKOF_EFLG_TXEP                ( (uint8_t)0x10U )
-#define MASKOF_EFLG_RXEP                ( (uint8_t)0x08U )
-#define MASKOF_EFLG_TXWAR               ( (uint8_t)0x04U )
-#define MASKOF_EFLG_RXWAR               ( (uint8_t)0x02U )
-#define MASKOF_EFLG_EWARN               ( (uint8_t)0x01U )
-#define MASKOF_TXBCTRL_ABTF             ( (uint8_t)0x40U )
-#define MASKOF_TXBCTRL_MLOA             ( (uint8_t)0x20U )
-#define MASKOF_TXBCTRL_TXERR            ( (uint8_t)0x10U )
-#define MASKOF_TXBCTRL_TXREQ            ( (uint8_t)0x08U )
-#define MASKOF_TXBCTRL_TXP              ( (uint8_t)0x03U )
-#define MASKOF_RXBCTRL_RXM              ( (uint8_t)0x60U )
-#define MASKOF_RXBCTRL_RXRTR            ( (uint8_t)0x08U )
-#define MASKOF_RXB0CTRL_BUKT            ( (uint8_t)0x04U )
-#define MASKOF_RXB0CTRL_FILHIT          ( (uint8_t)0x01U )
-#define MASKOF_RXB1CTRL_FILHIT          ( (uint8_t)0x07U )
-#define MASKOF_SIDH_CANID               ( (uint8_t)0XFFU )
-#define MASKOF_SIDL_CANID               ( (uint8_t)0XE0U )
-#define MASKOF_SIDL_IDE                 ( (uint8_t)0x08U )
-#define MASKOF_RTR                      ( (uint8_t)0x40U )
-#define MASKOF_DLC                      ( (uint8_t)0x0FU )
-
 /* MCP2515 operation mode */
 #define OPMOD_NORMAL                    ( (uint8_t)0x00U )
 #define OPMOD_SLEEP                     ( (uint8_t)0x20U )
@@ -201,7 +25,29 @@
 #define CAN_HDR_EID8                    ( (uint8_t)2U )
 #define CAN_HDR_EID0                    ( (uint8_t)3U )
 #define CAN_HDR_DLC                     ( (uint8_t)4U )
-#define CAN_HDR_LEN                     ( (uint8_t)5U )
+#define CAN_HDR_QTY                     ( (uint8_t)5U )
+
+/* To standard CAN ID */
+#define SIDH_L_SHIFT_TO_STD_CANID       ( (uint8_t)3U )
+#define SIDL_R_SHIFT_TO_STD_CANID       ( (uint8_t)5U )
+
+/* From standard CAN ID */
+#define STD_CANID_MASK_TO_SIDH          ( (uint32_t)0x000007F8U )
+#define STD_CANID_MASK_TO_SIDL          ( (uint32_t)0x00000007U )
+
+#define STD_CANID_R_SHIFT_TO_SIDH       ( SIDH_L_SHIFT_IF_STD_CANID )
+#define STD_CANID_L_SHIFT_TO_SIDL       ( SIDL_R_SHIFT_TO_STD_CANID )
+
+
+/* To Extended CAN ID */
+#define SIDL_E0_MASK_TO_STD_CANID       ( (uint8_t)0xE0U )
+#define SIDL_03_MASK_TO_STD_CANID       ( (uint8_t)0x03U )
+
+#define SIDH_L_SHIFT_TO_EXT_CANID       ( (uint8_t)21U )
+#define SIDL_E0_L_SHIFT_TO_EXT_CANID    ( (uint8_t)13U )
+#define SIDL_03_L_SHIFT_TO_EXT_CANID    ( (uint8_t)16U )
+#define EID8_L_SHIFT_TO_EXT_CANID       ( (uint8_t) 8U )
+
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -222,7 +68,8 @@ static void wait_until_change_opmod( const uint8_t expect_opmod );
 static uint8_t get_opmod( void );
 static void set_opmod( const uint8_t opmod );
 static void wakeup( void );
-static uint32_t build_std_canid( const size_t len, uint8_t *p_hdr );
+static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl );
+static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 );
 
 void mcp2515_reset( void )
 {
@@ -439,7 +286,7 @@ static void wakeup( void )
 
 void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
 {
-    uint8_t hdr[ CAN_HDR_LEN ] = { 0U };
+    uint8_t hdr[ CAN_HDR_QTY ] = { 0U };
     uint8_t msg[ CAN_DLC_MAX ] = { 0U };
     uint32_t can_id;
 
@@ -451,10 +298,10 @@ void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
     /* Read CAN header from register. */
     begin_spi();
     write_spi( SPICMD_READ_RX0_HDR );
-    read_spi_array( CAN_HDR_LEN, hdr );
+    read_spi_array( CAN_HDR_QTY, hdr );
     end_spi();
 
-    can_id = build_std_canid( CAN_HDR_LEN, hdr );
+    can_id = build_std_canid( hdr[ CAN_HDR_SIDH ], hdr[ CAN_HDR_SIDL ] );
 
     begin_spi();
     write_spi( SPICMD_READ_RX0_BODY );
@@ -469,12 +316,90 @@ void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
     write_reg( REG_CANINTF, REG_VAL_00 );
 }
 
-static uint32_t build_std_canid( const size_t len, uint8_t *p_hdr ) {
-#define SIDH_CANID_OFFSET ( (uint8_t)3U )
-#define SIDL_CANID_OFFSET ( (uint8_t)5U )
+static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl )
+{
+    uint32_t can_id;
 
-    return (uint32_t)(
-        (uint16_t)( (uint16_t)p_hdr[ CAN_HDR_SIDH ] << SIDH_CANID_OFFSET )
-      | (uint16_t)( (uint8_t)( p_hdr[ CAN_HDR_SIDL ] & MASKOF_SIDL_CANID ) >> SIDL_CANID_OFFSET )
-    );
+    can_id  = (uint32_t)(  (uint8_t)sidl >> SIDL_R_SHIFT_TO_STD_CANID );
+    can_id |= (uint32_t)( (uint16_t)sidh << SIDH_L_SHIFT_TO_STD_CANID );
+
+    return can_id;
 }
+
+static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 )
+{
+    uint32_t can_id = CAN_ID_INVALID;
+    uint32_t sidl_e0;
+    uint32_t sidl_03;
+
+    sidl_e0 = (uint32_t)( sidl & SIDL_E0_MASK_TO_STD_CANID );
+    sidl_03 = (uint32_t)( sidl & SIDL_03_MASK_TO_STD_CANID );
+
+    can_id  = (uint32_t)eid0;
+    can_id |= (uint32_t)( (uint32_t)   eid8 <<    EID8_L_SHIFT_TO_EXT_CANID );
+    can_id |= (uint32_t)(           sidl_03 << SIDL_03_L_SHIFT_TO_EXT_CANID );
+    can_id |= (uint32_t)(           sidl_e0 << SIDL_E0_L_SHIFT_TO_EXT_CANID );
+    can_id |= (uint32_t)( (uint32_t)   sidh <<    SIDH_L_SHIFT_TO_EXT_CANID );
+
+    return can_id;
+}
+
+// static void set_can_id( const can_frame_kind_t kind, const uint32_t can_id,
+//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
+
+//     /* Fails if illegal arguments. */
+//     if ( is_invalid_canid_kind( kind ) || ( NULL == hdr ) )
+//         return CD_FAILURE;
+
+//     if ( CD_CANID_KIND_STD == kind ) {
+//         /*--------------------------*/
+//         /* Case of standard format. */
+//         /*--------------------------*/
+
+//         /* Fails if too large. */
+//         if ( CD_MAXOF_STD_CANID < can_id )
+//             return CD_FAILURE;
+
+//         hdr[ MCP2515_CANHDR_EID0 ] = 0U;
+//         hdr[ MCP2515_CANHDR_EID8 ] = 0U;
+//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( can_id << 5U ) & 0xE0U );
+//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 3U );
+//     } 
+//     else {
+//         /*--------------------------*/
+//         /* Case of extended format. */
+//         /*--------------------------*/
+
+//         /* Fails if too large. */
+//         if ( CD_MAXOF_EXT_CANID < can_id )
+//             return CD_FAILURE;
+
+//         hdr[ MCP2515_CANHDR_EID0 ] = (uint8_t)can_id;
+//         hdr[ MCP2515_CANHDR_EID8 ] = (uint8_t)( can_id >> 8U );
+//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( ( can_id >> 16U ) & 0x03U )
+//             | MASKOF_SIDL_IDE | ( ( can_id >> 13U ) & 0xE0U ) );
+//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 21U );
+//     }
+// }
+
+// static cd_result_t set_can_dlc( const uint8_t dlc, const bool is_remote,
+//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
+
+//     uint8_t reg_val = 0U;
+
+//     /* Fails if illegal arguments. */
+//     if ( ( CD_CANDLC_MAXOF_LEN < dlc ) || ( NULL == hdr ) )
+//         return CD_FAILURE;
+    
+//     reg_val = (uint8_t)( reg_val | (uint8_t)( dlc & 0xF ) );
+
+//     if( true == is_remote ) {
+
+//         reg_val = (uint8_t)( reg_val | MASKOF_RTR );
+//     }
+
+//     hdr[ MCP2515_CANHDR_DLC ] = reg_val;
+
+//     return CD_SUCCESS;
+// }
+
