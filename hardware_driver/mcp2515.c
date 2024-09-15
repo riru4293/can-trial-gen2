@@ -437,7 +437,7 @@ static void wakeup( void )
     modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
 }
 
-void mcp2515_get_can_msg( const can_rx_t can_rx, can_frame_t *p_msg )
+void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
 {
     uint8_t hdr[ CAN_HDR_LEN ] = { 0U };
     uint8_t msg[ CAN_DLC_MAX ] = { 0U };

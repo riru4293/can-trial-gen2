@@ -11,6 +11,6 @@
 /* -------------------------------------------------------------------------- */
 void mcp2515_reset( void );
 void mcp2515_begin_communication( void );
-void mcp2515_get_can_msg( const can_rx_t can_rx, can_frame_t *p_msg );
+void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg );
 
 #endif /* MCP2515_H */
