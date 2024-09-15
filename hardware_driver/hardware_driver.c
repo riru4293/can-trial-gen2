@@ -46,7 +46,7 @@ void hwdrv_begin_can_communication( void )
     mcp2515_begin_communication();
 }
 
-void hwdrv_get_can_msg( const can_rx_t can_rx, can_frame_t *p_msg )
+void hwdrv_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
 {
     mcp2515_get_can_msg( can_rx, p_msg );
 }

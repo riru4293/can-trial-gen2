@@ -33,4 +33,17 @@ typedef struct st_can_frame
     uint8_t data[ CAN_DLC_MAX ];
 } can_frame_t;
 
+typedef enum en_can_data_idx
+{
+    E_CAN_DATA_0,
+    E_CAN_DATA_1,
+    E_CAN_DATA_2,
+    E_CAN_DATA_3,
+    E_CAN_DATA_4,
+    E_CAN_DATA_5,
+    E_CAN_DATA_6,
+    E_CAN_DATA_7
+} can_data_idx_t;
+
+
 #endif /* MY_CAN_H */

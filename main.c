@@ -23,7 +23,7 @@
 
 int main( void )
 {
-    can_frame_t msg = {
+    can_frame_t can_frame = {
         .id = CAN_ID_INVALID,
         .kind = E_CAN_FRAME_INVALID,
         .dlc = CAN_DLC_INVALID,
@@ -39,17 +39,17 @@ int main( void )
     // vTaskStartScheduler();
 
     while ( true ) {
-        hwdrv_get_can_msg( E_CAN_RX1, &msg );
+        hwdrv_get_can_frame( E_CAN_RX1, &can_frame );
 
-        printf("CANID:%03Xh %02X %02X %02X %02X %02X %02X %02X %02X\n", msg.id,
-            msg.data[0],
-            msg.data[1],
-            msg.data[2],
-            msg.data[3],
-            msg.data[4],
-            msg.data[5],
-            msg.data[6],
-            msg.data[7]
+        printf("CANID:%03Xh %02X %02X %02X %02X %02X %02X %02X %02X\n", can_frame.id,
+            can_frame.data[E_CAN_DATA_0],
+            can_frame.data[E_CAN_DATA_1],
+            can_frame.data[E_CAN_DATA_2],
+            can_frame.data[E_CAN_DATA_3],
+            can_frame.data[E_CAN_DATA_4],
+            can_frame.data[E_CAN_DATA_5],
+            can_frame.data[E_CAN_DATA_6],
+            can_frame.data[E_CAN_DATA_7]
         );
     }
 
