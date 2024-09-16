@@ -124,6 +124,15 @@
 #define REG_VAL_00                      ( (uint8_t)0x00U )
 #define REG_VAL_FF                      ( (uint8_t)0xFFU )
 
+#define REG_VAL_SIDL_IDE_STD            ( (uint8_t)0x00U )
+#define REG_VAL_SIDL_IDE_EXT            ( (uint8_t)0x08U )
+
+#define REG_VAL_SIDL_SRR_DAT            ( (uint8_t)0x00U )
+#define REG_VAL_SIDL_SRR_RMT            ( (uint8_t)0x10U )
+
+#define REG_VAL_RTR_DAT                 ( (uint8_t)0x10U )
+#define REG_VAL_RTR_RMT                 ( (uint8_t)0x10U )
+
 /* Mask of the register value */
 #define MASKOF_OPMOD                    ( (uint8_t)0xE0U )
 #define MASKOF_CANSTAT_ICOD             ( (uint8_t)0x0EU )
@@ -158,6 +167,7 @@
 #define MASKOF_SIDH_CANID               ( (uint8_t)0XFFU )
 #define MASKOF_SIDL_CANID               ( (uint8_t)0XE0U )
 #define MASKOF_SIDL_IDE                 ( (uint8_t)0x08U )
+#define MASKOF_SIDL_SRR                 ( (uint8_t)0x10U )
 #define MASKOF_RTR                      ( (uint8_t)0x40U )
 #define MASKOF_DLC                      ( (uint8_t)0x0FU )
 

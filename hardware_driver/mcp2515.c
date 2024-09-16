@@ -4,6 +4,9 @@
 /* System */
 #include <string.h>
 
+/* My standard library */
+#include <my_error_code.h>
+
 /* Driver */
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
@@ -20,12 +23,23 @@
 #define OPMOD_LISTENONLY                ( (uint8_t)0x60U )
 #define OPMOD_CONFIG                    ( (uint8_t)0x80U )
 
-#define CAN_HDR_SIDH                    ( (uint8_t)0U )
-#define CAN_HDR_SIDL                    ( (uint8_t)1U )
-#define CAN_HDR_EID8                    ( (uint8_t)2U )
-#define CAN_HDR_EID0                    ( (uint8_t)3U )
-#define CAN_HDR_DLC                     ( (uint8_t)4U )
-#define CAN_HDR_QTY                     ( (uint8_t)5U )
+typedef enum en_can_frame_buff
+{
+    E_CAN_FRAME_SIDH = 0U,
+    E_CAN_FRAME_SIDL,
+    E_CAN_FRAME_EID8,
+    E_CAN_FRAME_EID0,
+    E_CAN_FRAME_DLC,
+    E_CAN_FRAME_DATA_1,
+    E_CAN_FRAME_DATA_2,
+    E_CAN_FRAME_DATA_3,
+    E_CAN_FRAME_DATA_4,
+    E_CAN_FRAME_DATA_5,
+    E_CAN_FRAME_DATA_6,
+    E_CAN_FRAME_DATA_7,
+    E_CAN_FRAME_DATA_8,
+    E_CAN_FRAME_QTY
+} can_frame_buff_t;
 
 /* To standard CAN ID */
 #define SIDH_L_SHIFT_TO_STD_CANID       ( (uint8_t)3U )
@@ -284,36 +298,89 @@ static void wakeup( void )
     modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
 }
 
-void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg )
+void get_rx_buff( const can_rx_t can_rx, size_t len, uint8_t *p_buff )
 {
-    uint8_t hdr[ CAN_HDR_QTY ] = { 0U };
-    uint8_t msg[ CAN_DLC_MAX ] = { 0U };
+    uint8_t reg_addr;
+
+    switch( can_rx )
+    {
+    case E_CAN_RX1:
+        reg_addr = REG_RXB0SIDH;
+        break;
+    case E_CAN_RX2:
+        reg_addr = REG_RXB1SIDH;
+        break;
+    default:
+        // Do nothing
+        break;
+    };
+
+    if( ( NULL!= p_buff ) && ( E_CAN_FRAME_QTY == len ) )
+    {
+        read_reg_array( reg_addr, len, p_buff );
+    }
+}
+
+void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
+{
+    uint8_t rx_buff[ E_CAN_FRAME_QTY ] = { 0U };
+
     uint32_t can_id;
+    can_frame_kind_t can_kind;
+    uint8_t can_dlc = CAN_DLC_INVALID;
+    uint8_t can_data[ CAN_DLC_MAX ] = { 0 };
 
-    uint8_t tttt;
+    // Get DLC
+    p_can_frame->dlc = rx_buff[ E_CAN_FRAME_DLC ] & MASKOF_DLC;
 
-    tttt = read_reg( REG_RXB0D0 );
-    tttt = 0U;
+    // Get Data
+    if( ( 0U < p_can_frame->dlc ) && ( CAN_DLC_MAX >= p_can_frame->dlc ) )
+    {
+        memcpy( p_can_frame->data, &rx_buff[ E_CAN_FRAME_DATA_1 ], can_dlc );
+    }
 
-    /* Read CAN header from register. */
-    begin_spi();
-    write_spi( SPICMD_READ_RX0_HDR );
-    read_spi_array( CAN_HDR_QTY, hdr );
-    end_spi();
+    // Is Standard? Extended?
+    bool is_std;
+    uint8_t sidl_ide;
+    sidl_ide = (uint8_t)( rx_buff[ E_CAN_FRAME_SIDL ] & MASKOF_SIDL_IDE );
+    is_std = ( REG_VAL_SIDL_IDE_STD != sidl_ide ) ? true : false;
 
-    can_id = build_std_canid( hdr[ CAN_HDR_SIDH ], hdr[ CAN_HDR_SIDL ] );
+    // Is Remote?
+    bool is_remote;
+    uint8_t sidl_srr;
+    uint8_t dlc_rtr;
+    if( true == is_std )
+    {
+        sidl_srr = (uint8_t)( rx_buff[ E_CAN_FRAME_SIDL ] & MASKOF_SIDL_SRR );
+        is_remote = ( REG_VAL_SIDL_SRR_RMT == sidl_srr ) ? true : false;
+    }
+    else
+    {
+        dlc_rtr = (uint8_t)( rx_buff[ E_CAN_FRAME_DLC ] & MASKOF_RTR );
+        is_remote = ( REG_VAL_RTR_RMT == sidl_srr ) ? true : false;
+    }
 
-    begin_spi();
-    write_spi( SPICMD_READ_RX0_BODY );
-    read_spi_array( CAN_DLC_MAX, msg );
-    end_spi();
+    if( true == is_remote)
+    {
+        p_can_frame->kind = E_CAN_FRAME_REMOTE;
+    }
 
-
-    p_msg->id = can_id;
-    memcpy( p_msg->data, msg, CAN_DLC_MAX );
-
-    /* Clear interruption by received. */
-    write_reg( REG_CANINTF, REG_VAL_00 );
+    if( true == is_std )
+    {
+        p_can_frame->id = build_std_canid(
+            rx_buff[ E_CAN_FRAME_SIDH ],
+            rx_buff[ E_CAN_FRAME_SIDL ]
+        );
+    }
+    else
+    {
+        p_can_frame->id = build_ext_canid(
+            rx_buff[ E_CAN_FRAME_SIDH ],
+            rx_buff[ E_CAN_FRAME_SIDL ],
+            rx_buff[ E_CAN_FRAME_EID8 ],
+            rx_buff[ E_CAN_FRAME_EID0 ]
+        );
+    }
 }
 
 static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl )

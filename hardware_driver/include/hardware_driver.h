@@ -27,5 +27,5 @@ void hwdrv_reset_can_controller( void );
 void hwdrv_begin_can_communication( void );
 void hwdrv_set_can_irq_callback( const can_irq_callback_t callback );
 void hwdrv_enable_can_irq( const bool enabled );
-void hwdrv_get_can_frame( const can_rx_t can_rx, can_frame_t *p_msg );
+void hwdrv_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame );
 #endif /* HARDWARE_DRIVER_H */
