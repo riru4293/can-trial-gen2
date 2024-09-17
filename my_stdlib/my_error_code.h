@@ -10,6 +10,6 @@ typedef enum en_return_code
 {
     E_OK,
     E_NOK
-} return_code_t;
+} ret_cd_t;
 
 #endif /* MY_ERROR_CODE_H */

@@ -7,12 +7,6 @@
 /* RP2040 */
 #include <pico/types.h>
 
-/* My standard library */
-#include <my_can.h>
-
-/* Driver */
-#include <hardware_driver.h>
-
 /* FreeRTOS */
 #include <FreeRTOS.h>
 #include <task.h>
@@ -20,6 +14,16 @@
 #include <semphr.h>
 #include <event_groups.h>
 #include <queue.h>
+
+/* My standard library */
+#include <my_can.h>
+
+/* Driver */
+#include <hardware_driver.h>
+
+/* My module */
+#include <can_manager.h>
+
 
 void test_irq( void );
 
@@ -48,7 +52,9 @@ int main( void )
 
     hwd_begin_can_communication();
 
-    // vTaskStartScheduler();
+    cam_create_task();
+
+    vTaskStartScheduler();
 
     while ( true ) {
         hwd_get_can_frame( E_CAN_RX1, &can_frame );

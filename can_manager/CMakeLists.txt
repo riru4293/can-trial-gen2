@@ -6,6 +6,8 @@ add_library(can_manager STATIC
 
 # Add the library
 target_link_libraries(can_manager
+    # FreeRTOS
+    PRIVATE free_rtos
     # My module
     PRIVATE hardware_driver
 )

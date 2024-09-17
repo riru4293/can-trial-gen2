@@ -49,12 +49,12 @@ add_executable(can_trial ${CMAKE_CURRENT_LIST_DIR}/main.c)
 
 # Add the standard library to the build
 target_link_libraries(can_trial
-  # FreeRTOS
-  PRIVATE free_rtos
-  # Driver
-  PRIVATE hardware_driver
-  # My module
-  PRIVATE can_manager
+    # FreeRTOS
+    PRIVATE free_rtos
+    # Driver
+    PRIVATE hardware_driver
+    # My module
+    PRIVATE can_manager
 )
 
 pico_set_program_name(can_trial "can_trial")
