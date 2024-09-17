@@ -21,6 +21,13 @@
 #include <event_groups.h>
 #include <queue.h>
 
+void test_irq( void );
+
+void test_irq(void )
+{
+    
+}
+
 int main( void )
 {
     can_frame_t can_frame = {
@@ -34,6 +41,10 @@ int main( void )
     hwdrv_init_hardware();
 
     hwdrv_reset_can_controller();
+
+    hwdrv_set_can_irq_callback( test_irq );
+
+    hwdrv_enable_can_irq( true );
 
     hwdrv_begin_can_communication();
 

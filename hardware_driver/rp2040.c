@@ -167,8 +167,16 @@ void rp2040_write_spi_1( const uint8_t val )
 /* -------------------------------------------------------------------------- */
 static void irq_callback( const uint gpio, const uint32_t events )
 {
-    if( ( NULL != g_can_irq_callback ) && ( CAN_CTRL_PORT_IRQ == gpio ) )
+    switch( gpio )
     {
-        g_can_irq_callback();
+    case CAN_CTRL_PORT_IRQ:
+        if( NULL != g_can_irq_callback )
+        {
+            g_can_irq_callback();
+        }
+        break;
+    default:
+        // Do nothing
+        break;
     }
 }
