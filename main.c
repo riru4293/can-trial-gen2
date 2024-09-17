@@ -27,6 +27,7 @@ int main( void )
         .id = CAN_ID_INVALID,
         .kind = E_CAN_FRAME_INVALID,
         .dlc = CAN_DLC_INVALID,
+        .is_data = false,
         .data = { 0U }
     };
 

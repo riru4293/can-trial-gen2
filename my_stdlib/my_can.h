@@ -21,8 +21,8 @@
 typedef enum en_can_frame_kind
 {
     E_CAN_FRAME_INVALID,
-    E_CAN_FRAME_DATA,
-    E_CAN_FRAME_REMOTE
+    E_CAN_FRAME_STD,
+    E_CAN_FRAME_EXT
 } can_frame_kind_t;
 
 typedef struct st_can_frame
@@ -30,6 +30,7 @@ typedef struct st_can_frame
     uint32_t id;
     can_frame_kind_t kind;
     uint8_t dlc;
+    bool is_data;
     uint8_t data[ CAN_DLC_MAX ];
 } can_frame_t;
 

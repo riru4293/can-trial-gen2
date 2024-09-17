@@ -344,6 +344,14 @@ void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
     uint8_t sidl_ide;
     sidl_ide = (uint8_t)( rx_buff[ E_CAN_FRAME_SIDL ] & MASKOF_SIDL_IDE );
     is_std = ( REG_VAL_SIDL_IDE_STD != sidl_ide ) ? true : false;
+    if( true == is_std )
+    {
+        p_can_frame->kind = E_CAN_FRAME_STD;
+    }
+    else
+    {
+        p_can_frame->kind = E_CAN_FRAME_EXT;
+    }
 
     // Is Remote?
     bool is_remote;
@@ -360,10 +368,7 @@ void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
         is_remote = ( REG_VAL_RTR_RMT == sidl_srr ) ? true : false;
     }
 
-    if( true == is_remote)
-    {
-        p_can_frame->kind = E_CAN_FRAME_REMOTE;
-    }
+    p_can_frame->is_data = ( false == is_remote) ? true : false;
 
     if( true == is_std )
     {
