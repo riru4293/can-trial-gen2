@@ -9,7 +9,7 @@
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
 
-void hwdrv_init_hardware( void )
+void hwd_init_hardware( void )
 {
     /* Initialize standard I/O */
     stdio_init_all();
@@ -21,32 +21,32 @@ void hwdrv_init_hardware( void )
     rp2040_init_spi_1_hw();
 }
 
-void hwdrv_light_led_1( const bool lit )
+void hwd_light_led_1( const bool lit )
 {
     rp2040_light_led_1( lit );
 }
 
-void hwdrv_reset_can_controller( void )
+void hwd_reset_can_controller( void )
 {
     mcp2515_reset();
 }
 
-void hwdrv_set_can_irq_callback( const can_irq_callback_t callback )
+void hwd_set_can_irq_callback( const can_irq_callback_t callback )
 {
     rp2040_set_can_irq_callback( callback );
 }
 
-void hwdrv_enable_can_irq( const bool enabled )
+void hwd_enable_can_irq( const bool enabled )
 {
     rp2040_enable_can_irq( enabled );
 }
 
-void hwdrv_begin_can_communication( void )
+void hwd_begin_can_communication( void )
 {
     mcp2515_begin_communication();
 }
 
-void hwdrv_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
+void hwd_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
 {
     mcp2515_get_can_frame( can_rx, p_can_frame );
 }

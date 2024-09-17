@@ -38,20 +38,20 @@ int main( void )
         .data = { 0U }
     };
 
-    hwdrv_init_hardware();
+    hwd_init_hardware();
 
-    hwdrv_reset_can_controller();
+    hwd_reset_can_controller();
 
-    hwdrv_set_can_irq_callback( test_irq );
+    hwd_set_can_irq_callback( test_irq );
 
-    hwdrv_enable_can_irq( true );
+    hwd_enable_can_irq( true );
 
-    hwdrv_begin_can_communication();
+    hwd_begin_can_communication();
 
     // vTaskStartScheduler();
 
     while ( true ) {
-        hwdrv_get_can_frame( E_CAN_RX1, &can_frame );
+        hwd_get_can_frame( E_CAN_RX1, &can_frame );
 
         printf("CANID:%03Xh %02X %02X %02X %02X %02X %02X %02X %02X\n", can_frame.id,
             can_frame.data[E_CAN_DATA_0],

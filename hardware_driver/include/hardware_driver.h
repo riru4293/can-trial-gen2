@@ -21,11 +21,11 @@ typedef enum en_can_rx
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-void hwdrv_init_hardware( void );
-void hwdrv_light_led_1( const bool lit );
-void hwdrv_reset_can_controller( void );
-void hwdrv_begin_can_communication( void );
-void hwdrv_set_can_irq_callback( const can_irq_callback_t callback );
-void hwdrv_enable_can_irq( const bool enabled );
-void hwdrv_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame );
+void hwd_init_hardware( void );
+void hwd_light_led_1( const bool lit );
+void hwd_reset_can_controller( void );
+void hwd_begin_can_communication( void );
+void hwd_set_can_irq_callback( const can_irq_callback_t callback );
+void hwd_enable_can_irq( const bool enabled );
+void hwd_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame );
 #endif /* HARDWARE_DRIVER_H */
