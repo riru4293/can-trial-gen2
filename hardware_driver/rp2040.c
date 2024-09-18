@@ -135,7 +135,7 @@ void rp2040_read_spi_1_array( const size_t len, uint8_t *p_buff )
     }
 }
 
-void rp2040_write_spi_1_array( const size_t len, const uint8_t const *p_buff )
+void rp2040_write_spi_1_array( const size_t len, const uint8_t *p_buff )
 {
     if( ( 0U < len ) && ( NULL != p_buff ) )
     {
