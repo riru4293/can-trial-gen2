@@ -36,6 +36,7 @@ typedef enum en_cam_event
 static void task( void *nouse );
 static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
+static void proc_recv_can( const can_rx_t can_rx );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                  */
@@ -67,6 +68,14 @@ static void task( void *nouse )
 {
     EventBits_t events;
 
+    can_frame_t can_frame = {
+        .id = CAN_ID_INVALID,
+        .kind = E_CAN_FRAME_INVALID,
+        .dlc = CAN_DLC_INVALID,
+        .is_data = false,
+        .data = { 0U }
+    };
+
     while( true )
     {
         events = xEventGroupWaitBits( g_evt_hndl, E_CAM_EVT_ALL, pdTRUE, pdFALSE, portMAX_DELAY );
@@ -81,6 +90,10 @@ static void task( void *nouse )
             if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
                 /* Read CAN frame from RX1 */
+                hwd_get_can_frame( E_CAN_RX1, &can_frame );
+
+                /* Process a received CAN frame */
+                proc_recv_can( E_CAN_RX1 );
 
                 /* Enable CAN IRQ factor of the RX1 */
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX1 );
@@ -89,6 +102,10 @@ static void task( void *nouse )
             if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
                 /* Read CAN frame from RX2 */
+                hwd_get_can_frame( E_CAN_RX2, &can_frame );
+
+                /* Process a received CAN frame */
+                proc_recv_can( E_CAN_RX2 );
 
                 /* Enable CAN IRQ factor of the RX2 */
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX2 );
@@ -131,4 +148,42 @@ static void reset_controller( void )
 
     /* Begin CAN communication */
     hwd_begin_can_communication();
+}
+
+static void proc_recv_can( const can_rx_t can_rx )
+{
+    typedef void ( *can_recv )( const can_frame_t *p_can_frame );
+
+    typedef struct st_can_proc
+    {
+        uint32_t id;
+        can_recv recv_func;
+    } can_proc_t;
+
+    const can_proc_t proc_tbl[] = {
+        { 0x477U, NULL }
+    };
+
+    can_frame_t can_frame = {
+        .id = CAN_ID_INVALID,
+        .kind = E_CAN_FRAME_INVALID,
+        .dlc = CAN_DLC_INVALID,
+        .is_data = false,
+        .data = { 0U }
+    };
+
+    uint8_t idx;
+    uint8_t tbl_qty;
+
+    hwd_get_can_frame( can_rx, &can_frame );
+
+    tbl_qty = sizeof( proc_tbl ) / sizeof( can_proc_t );
+
+    for( idx = 0U; idx < tbl_qty; idx++ )
+    {
+        if( ( can_frame.id == proc_tbl[idx].id ) && ( NULL != proc_tbl[idx].recv_func ) )
+        {
+            proc_tbl[idx].recv_func( &can_frame );
+        }
+    }
 }
