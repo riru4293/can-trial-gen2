@@ -80,36 +80,19 @@ static void task( void *nouse )
         {
             if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
-                // RX1割込要因を有効化
+                /* Read CAN frame from RX1 */
 
+                /* Enable CAN IRQ factor of the RX1 */
+                hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX1 );
             }
+
             if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
-                // RX2割込要因を有効化
+                /* Read CAN frame from RX2 */
+
+                /* Enable CAN IRQ factor of the RX2 */
+                hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX2 );
             }
-            // if( E_CAM_EVT_NONE != ( E_CAM_EVT_CAN_IRQ & events ) )
-            // {
-
-            //     /* Get occurred CAN IRQ */
-            //     occurred_irq = hwd_get_occurred_irq();
-
-            //     /* If an IRQ occurred, disable it factor. */
-            //     /* Because it prevents reentrancy by the same IRQ factor. */
-            //     if ( DRV_IRQ_NONE != occurred_irq )
-            //     {
-            //         hwd_enable_can_ctrl_irq( occurred_irq );
-
-            //         hwd_enable_can_irq_fact( occurred_irq );
-            //         hwd_disable_can_irq_fact( occurred_irq );
-
-            //         // CAN_IRQ要因をHWDRVで定義（実体はMCP2515の値）
-            //     }
-
-            //     /* Get CAN frame from RX1 */
-
-            //     /* Enable CAN IRQ */
-            //     hwd_enable_can_ctrl_irq( true );
-            // }
         }
     }
 

@@ -9,6 +9,9 @@
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
 
+/* -------------------------------------------------------------------------- */
+/* Public function                                                            */
+/* -------------------------------------------------------------------------- */
 void hwd_init_hardware( void )
 {
     /* Initialize standard I/O */
@@ -49,4 +52,9 @@ void hwd_begin_can_communication( void )
 void hwd_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
 {
     mcp2515_get_can_frame( can_rx, p_can_frame );
+}
+
+void hwd_enable_can_irq_fact( const uint8_t fact )
+{
+    mcp2515_enable_can_irq_fact( fact );
 }

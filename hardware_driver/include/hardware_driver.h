@@ -40,4 +40,6 @@ void hwd_begin_can_communication( void );
 void hwd_set_can_irq_callback( const can_irq_callback_t callback );
 void hwd_enable_can_irq( const bool enabled );
 void hwd_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame );
+void hwd_enable_can_irq_fact( const uint8_t fact );
+
 #endif /* HARDWARE_DRIVER_H */

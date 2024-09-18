@@ -91,6 +91,9 @@ static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const u
 /* -------------------------------------------------------------------------- */
 static can_irq_callback_t g_can_irq_callback = NULL;
 
+/* -------------------------------------------------------------------------- */
+/* Public function                                                            */
+/* -------------------------------------------------------------------------- */
 void mcp2515_reset( void )
 {
     /* Execute reset command */
@@ -119,6 +122,12 @@ void mcp2515_begin_communication( void )
 void mcp2515_set_can_irq_callback( const can_irq_callback_t callback )
 {
     g_can_irq_callback = callback;
+}
+
+void mcp2515_enable_can_irq_fact( const uint8_t fact )
+{
+    /* Enable IRQ factor */
+    modify_reg( REG_CANINTE, fact, REG_VAL_FF );
 }
 
 /* -------------------------------------------------------------------------- */
