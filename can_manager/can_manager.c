@@ -71,19 +71,19 @@ static void task( void *nouse )
     {
         events = xEventGroupWaitBits( g_evt_hndl, E_CAM_EVT_ALL, pdTRUE, pdFALSE, portMAX_DELAY );
 
-        if( E_CAM_EVT_RESET != ( E_CAM_EVT_RESET & events ) )
+        if( (EventBits_t)E_CAM_EVT_RESET != ( (EventBits_t)E_CAM_EVT_RESET & events ) )
         {
             /* Reset CAN controller */
             reset_controller();
         }
         else
         {
-            if( E_CAM_EVT_RECV_RX1 != ( E_CAM_EVT_RECV_RX1 & events ) )
+            if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
                 // RX1割込要因を有効化
 
             }
-            if( E_CAM_EVT_RECV_RX2 != ( E_CAM_EVT_RECV_RX2 & events ) )
+            if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
                 // RX2割込要因を有効化
             }
