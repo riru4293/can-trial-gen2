@@ -22,7 +22,7 @@ typedef enum en_can_irq_fact
     E_CAN_IRQ_FACT_RX1 = 0x01U
 } can_irq_fact_t;
 
-typedef void (*can_irq_callback_t)( can_irq_fact_t occurred );
+typedef void (*can_irq_callback_t)( const uint8_t fact );
 
 typedef enum en_can_rx
 {
