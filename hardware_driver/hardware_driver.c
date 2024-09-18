@@ -33,7 +33,7 @@ void hwd_reset_can_controller( void )
 
 void hwd_set_can_irq_callback( const can_irq_callback_t callback )
 {
-    rp2040_set_can_irq_callback( callback );
+    mcp2515_set_can_irq_callback( callback );
 }
 
 void hwd_enable_can_irq( const bool enabled )

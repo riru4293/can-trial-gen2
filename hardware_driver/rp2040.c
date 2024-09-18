@@ -7,6 +7,7 @@
 
 /* Driver */
 #include <private/rp2040.h>
+#include <private/can_irq.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -78,7 +79,6 @@ static void irq_callback( const uint gpio, const uint32_t events );
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
-static can_irq_callback_t g_can_irq_callback = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
@@ -109,11 +109,6 @@ void rp2040_light_led_1( const bool lit )
     const bool lv = ( true == lit ) ? GPIO_LEVEL_HIGH : GPIO_LEVEL_LOW;
 
     gpio_put( LED_1_PORT, lv );
-}
-
-void rp2040_set_can_irq_callback( const can_irq_callback_t const callback )
-{
-    g_can_irq_callback = callback;
 }
 
 void rp2040_enable_can_irq( const bool enabled )
@@ -170,15 +165,7 @@ static void irq_callback( const uint gpio, const uint32_t events )
     switch( gpio )
     {
     case CAN_CTRL_PORT_IRQ:
-        if( NULL != g_can_irq_callback )
-        {
-            /* Disable CAN IRQ                           */
-            /* Because prevent continuous occurs CAN IRQ */
-            /* Must re-enable interrupts in the callback */
-            rp2040_enable_can_irq( false );
-
-            g_can_irq_callback();
-        }
+        mcp2515_can_irq_callback();
         break;
     default:
         // Do nothing

@@ -13,7 +13,6 @@
 void rp2040_init_led_1_hw( void );
 void rp2040_init_spi_1_hw( void );
 void rp2040_light_led_1( const bool lit );
-void rp2040_set_can_irq_callback( const can_irq_callback_t const callback );
 void rp2040_enable_can_irq( const bool enabled );
 void rp2040_begin_spi_1( void );
 void rp2040_end_spi_1( void );

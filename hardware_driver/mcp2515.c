@@ -12,6 +12,7 @@
 #include <private/mcp2515.h>
 #include <private/mcp2515_spicmd.h>
 #include <private/mcp2515_register.h>
+#include <private/can_irq.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -85,6 +86,11 @@ static void wakeup( void );
 static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl );
 static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 );
 
+/* -------------------------------------------------------------------------- */
+/* Global                                                                     */
+/* -------------------------------------------------------------------------- */
+static can_irq_callback_t g_can_irq_callback = NULL;
+
 void mcp2515_reset( void )
 {
     /* Execute reset command */
@@ -108,6 +114,34 @@ void mcp2515_reset( void )
 void mcp2515_begin_communication( void )
 {
     set_opmod( OPMOD_NORMAL );
+}
+
+void mcp2515_set_can_irq_callback( const can_irq_callback_t callback )
+{
+    g_can_irq_callback = callback;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Friend functions                                                           */
+/* -------------------------------------------------------------------------- */
+void mcp2515_can_irq_callback( void )
+{
+    uint8_t ocurred;
+
+    if( NULL != g_can_irq_callback )
+    {
+        /* Get occurred IRQ factor */
+        ocurred = read_reg( REG_CANINTF );
+
+        /* Disable re-cause occurred IRQ factor */
+        modify_reg( REG_CANINTE, ocurred, REG_VAL_00 );
+
+        /* Clear occurred IRQ factor */
+        modify_reg( REG_CANINTF, ocurred, REG_VAL_00 );
+
+        /* Indicate IRQ factor */
+        g_can_irq_callback( ocurred );
+    }
 }
 
 /* -------------------------------------------------------------------------- */

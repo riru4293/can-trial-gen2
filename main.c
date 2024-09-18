@@ -25,9 +25,9 @@
 #include <can_manager.h>
 
 
-void test_irq( void );
+void test_irq( can_irq_fact_t fact );
 
-void test_irq(void )
+void test_irq( can_irq_fact_t fact )
 {
     
 }

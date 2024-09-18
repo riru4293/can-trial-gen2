@@ -10,7 +10,19 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef void (*can_irq_callback_t)( void );
+typedef enum en_can_irq_fact
+{
+    E_CAN_IRQ_FACT_MER = 0x80U,
+    E_CAN_IRQ_FACT_WAK = 0x40U,
+    E_CAN_IRQ_FACT_ERR = 0x20U,
+    E_CAN_IRQ_FACT_TX3 = 0x10U,
+    E_CAN_IRQ_FACT_TX2 = 0x08U,
+    E_CAN_IRQ_FACT_TX1 = 0x04U,
+    E_CAN_IRQ_FACT_RX2 = 0x02U,
+    E_CAN_IRQ_FACT_RX1 = 0x01U
+} can_irq_fact_t;
+
+typedef void (*can_irq_callback_t)( can_irq_fact_t occurred );
 
 typedef enum en_can_rx
 {
