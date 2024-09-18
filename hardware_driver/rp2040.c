@@ -172,6 +172,11 @@ static void irq_callback( const uint gpio, const uint32_t events )
     case CAN_CTRL_PORT_IRQ:
         if( NULL != g_can_irq_callback )
         {
+            /* Disable CAN IRQ                           */
+            /* Because prevent continuous occurs CAN IRQ */
+            /* Must re-enable interrupts in the callback */
+            rp2040_enable_can_irq( false );
+
             g_can_irq_callback();
         }
         break;
