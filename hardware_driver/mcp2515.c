@@ -24,23 +24,23 @@
 #define OPMOD_LISTENONLY                ( (uint8_t)0x60U )
 #define OPMOD_CONFIG                    ( (uint8_t)0x80U )
 
-typedef enum en_can_frame_buff
+typedef enum en_can_buff
 {
-    E_CAN_FRAME_SIDH = 0U,
-    E_CAN_FRAME_SIDL,
-    E_CAN_FRAME_EID8,
-    E_CAN_FRAME_EID0,
-    E_CAN_FRAME_DLC,
-    E_CAN_FRAME_DATA_1,
-    E_CAN_FRAME_DATA_2,
-    E_CAN_FRAME_DATA_3,
-    E_CAN_FRAME_DATA_4,
-    E_CAN_FRAME_DATA_5,
-    E_CAN_FRAME_DATA_6,
-    E_CAN_FRAME_DATA_7,
-    E_CAN_FRAME_DATA_8,
-    E_CAN_FRAME_QTY
-} can_frame_buff_t;
+    E_CAN_BUFF_SIDH = 0U,
+    E_CAN_BUFF_SIDL,
+    E_CAN_BUFF_EID8,
+    E_CAN_BUFF_EID0,
+    E_CAN_BUFF_DLC,
+    E_CAN_BUFF_DATA_1,
+    E_CAN_BUFF_DATA_2,
+    E_CAN_BUFF_DATA_3,
+    E_CAN_BUFF_DATA_4,
+    E_CAN_BUFF_DATA_5,
+    E_CAN_BUFF_DATA_6,
+    E_CAN_BUFF_DATA_7,
+    E_CAN_BUFF_DATA_8,
+    E_CAN_BUFF_QTY
+} can_buff_t;
 
 /* To standard CAN ID */
 #define SIDH_L_SHIFT_TO_STD_CANID       ( (uint8_t)3U )
@@ -358,42 +358,42 @@ void get_rx_buff( const can_rx_t can_rx, size_t len, uint8_t *p_buff )
         break;
     };
 
-    if( ( NULL!= p_buff ) && ( E_CAN_FRAME_QTY == len ) )
+    if( ( NULL!= p_buff ) && ( E_CAN_BUFF_QTY == len ) )
     {
         read_reg_array( reg_addr, len, p_buff );
     }
 }
 
-void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
+void mcp2515_get_can_msg( const can_rx_t can_rx, can_msg_t *p_can_msg )
 {
-    uint8_t rx_buff[ E_CAN_FRAME_QTY ] = { 0U };
+    uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
 
     uint32_t can_id;
-    can_frame_kind_t can_kind;
+    can_kind_t can_kind;
     uint8_t can_dlc = CAN_DLC_INVALID;
     uint8_t can_data[ CAN_DLC_MAX ] = { 0 };
 
     // Get DLC
-    p_can_frame->dlc = rx_buff[ E_CAN_FRAME_DLC ] & MASKOF_DLC;
+    p_can_msg->dlc = rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_DLC;
 
     // Get Data
-    if( ( 0U < p_can_frame->dlc ) && ( CAN_DLC_MAX >= p_can_frame->dlc ) )
+    if( ( 0U < p_can_msg->dlc ) && ( CAN_DLC_MAX >= p_can_msg->dlc ) )
     {
-        memcpy( p_can_frame->data, &rx_buff[ E_CAN_FRAME_DATA_1 ], can_dlc );
+        memcpy( p_can_msg->data, &rx_buff[ E_CAN_BUFF_DATA_1 ], can_dlc );
     }
 
     // Is Standard? Extended?
     bool is_std;
     uint8_t sidl_ide;
-    sidl_ide = (uint8_t)( rx_buff[ E_CAN_FRAME_SIDL ] & MASKOF_SIDL_IDE );
+    sidl_ide = (uint8_t)( rx_buff[ E_CAN_BUFF_SIDL ] & MASKOF_SIDL_IDE );
     is_std = ( REG_VAL_SIDL_IDE_STD != sidl_ide ) ? true : false;
     if( true == is_std )
     {
-        p_can_frame->kind = E_CAN_FRAME_STD;
+        p_can_msg->kind = E_CAN_KIND_STD;
     }
     else
     {
-        p_can_frame->kind = E_CAN_FRAME_EXT;
+        p_can_msg->kind = E_CAN_KIND_EXT;
     }
 
     // Is Remote?
@@ -402,31 +402,31 @@ void mcp2515_get_can_frame( const can_rx_t can_rx, can_frame_t *p_can_frame )
     uint8_t dlc_rtr;
     if( true == is_std )
     {
-        sidl_srr = (uint8_t)( rx_buff[ E_CAN_FRAME_SIDL ] & MASKOF_SIDL_SRR );
+        sidl_srr = (uint8_t)( rx_buff[ E_CAN_BUFF_SIDL ] & MASKOF_SIDL_SRR );
         is_remote = ( REG_VAL_SIDL_SRR_RMT == sidl_srr ) ? true : false;
     }
     else
     {
-        dlc_rtr = (uint8_t)( rx_buff[ E_CAN_FRAME_DLC ] & MASKOF_RTR );
+        dlc_rtr = (uint8_t)( rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_RTR );
         is_remote = ( REG_VAL_RTR_RMT == sidl_srr ) ? true : false;
     }
 
-    p_can_frame->is_data = ( false == is_remote) ? true : false;
+    p_can_msg->is_data = ( false == is_remote) ? true : false;
 
     if( true == is_std )
     {
-        p_can_frame->id = build_std_canid(
-            rx_buff[ E_CAN_FRAME_SIDH ],
-            rx_buff[ E_CAN_FRAME_SIDL ]
+        p_can_msg->id = build_std_canid(
+            rx_buff[ E_CAN_BUFF_SIDH ],
+            rx_buff[ E_CAN_BUFF_SIDL ]
         );
     }
     else
     {
-        p_can_frame->id = build_ext_canid(
-            rx_buff[ E_CAN_FRAME_SIDH ],
-            rx_buff[ E_CAN_FRAME_SIDL ],
-            rx_buff[ E_CAN_FRAME_EID8 ],
-            rx_buff[ E_CAN_FRAME_EID0 ]
+        p_can_msg->id = build_ext_canid(
+            rx_buff[ E_CAN_BUFF_SIDH ],
+            rx_buff[ E_CAN_BUFF_SIDL ],
+            rx_buff[ E_CAN_BUFF_EID8 ],
+            rx_buff[ E_CAN_BUFF_EID0 ]
         );
     }
 }
@@ -459,7 +459,7 @@ static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const u
     return can_id;
 }
 
-// static void set_can_id( const can_frame_kind_t kind, const uint32_t can_id,
+// static void set_can_id( const can_kind_t kind, const uint32_t can_id,
 //     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
 
 //     /* Fails if illegal arguments. */
