@@ -24,12 +24,12 @@ void hwd_init_hardware( void )
     rp2040_init_spi_1_hw();
 }
 
-void hwd_light_led_1( const bool lit )
+void hwd_light_led_1( const bool on )
 {
-    rp2040_light_led_1( lit );
+    rp2040_light_led_1( on );
 }
 
-void hwd_reset_can_controller( void )
+void hwd_reset_can_ctrl( void )
 {
     mcp2515_reset();
 }
@@ -44,7 +44,7 @@ void hwd_enable_can_irq( const bool enabled )
     rp2040_enable_can_irq( enabled );
 }
 
-void hwd_begin_can_communication( void )
+void hwd_begin_can_comm( void )
 {
     mcp2515_begin_communication();
 }

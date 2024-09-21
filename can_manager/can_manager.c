@@ -132,7 +132,7 @@ static void irq_handler( const uint8_t fact )
 static void reset_controller( void )
 {
     /* Reset CAN controller */
-    hwd_reset_can_controller();
+    hwd_reset_can_ctrl();
 
     /* Set IRQ handler */
     hwd_set_can_irq_cbk( irq_handler );
@@ -141,7 +141,7 @@ static void reset_controller( void )
     hwd_enable_can_irq( true );
 
     /* Begin CAN communication */
-    hwd_begin_can_communication();
+    hwd_begin_can_comm();
 }
 
 static void proc_recv_can( const en_can_rx rx )
