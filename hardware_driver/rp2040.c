@@ -74,7 +74,7 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void irq_callback( const uint gpio, const uint32_t events );
+static void irq_cbk( const uint gpio, const uint32_t events );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -114,7 +114,7 @@ void rp2040_light_led_1( const bool lit )
 void rp2040_enable_can_irq( const bool enabled )
 {
     gpio_set_irq_enabled_with_callback(
-        CAN_CTRL_PORT_IRQ, GPIO_IRQ_LEVEL_LOW, enabled, irq_callback );
+        CAN_CTRL_PORT_IRQ, GPIO_IRQ_LEVEL_LOW, enabled, irq_cbk );
 }
 
 void rp2040_begin_spi_1( void )
@@ -160,12 +160,12 @@ void rp2040_write_spi_1( const uint8_t val )
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-static void irq_callback( const uint gpio, const uint32_t events )
+static void irq_cbk( const uint gpio, const uint32_t events )
 {
     switch( gpio )
     {
     case CAN_CTRL_PORT_IRQ:
-        mcp2515_can_irq_callback();
+        mcp2515_can_irq_cbk();
         break;
     default:
         // Do nothing

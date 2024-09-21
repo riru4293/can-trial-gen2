@@ -36,7 +36,7 @@ typedef enum en_cam_event
 static void task( void *nouse );
 static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
-static void proc_recv_can( const en_can_rx_t rx );
+static void proc_recv_can( const en_can_rx rx );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                  */
@@ -47,7 +47,7 @@ static EventGroupHandle_t g_evt_hndl = NULL;
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_ret_t cam_create_task( void )
+en_err cam_create_task( void )
 {
     BaseType_t ret = pdFAIL;
 
@@ -68,7 +68,7 @@ static void task( void *nouse )
 {
     EventBits_t events;
 
-    st_can_msg_t can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
+    st_can_msg can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
 
     while( true )
     {
@@ -135,7 +135,7 @@ static void reset_controller( void )
     hwd_reset_can_controller();
 
     /* Set IRQ handler */
-    hwd_set_can_irq_callback( irq_handler );
+    hwd_set_can_irq_cbk( irq_handler );
 
     /* Enable CAN IRQ */
     hwd_enable_can_irq( true );
@@ -144,9 +144,9 @@ static void reset_controller( void )
     hwd_begin_can_communication();
 }
 
-static void proc_recv_can( const en_can_rx_t rx )
+static void proc_recv_can( const en_can_rx rx )
 {
-    typedef void ( *can_recv )( const st_can_msg_t *p_can_msg );
+    typedef void ( *can_recv )( const st_can_msg *p_can_msg );
 
     typedef struct st_can_proc
     {
@@ -158,7 +158,7 @@ static void proc_recv_can( const en_can_rx_t rx )
         { 0x477U, NULL }
     };
 
-    st_can_msg_t can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
+    st_can_msg can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
 
     uint8_t idx;
     uint8_t tbl_qty;

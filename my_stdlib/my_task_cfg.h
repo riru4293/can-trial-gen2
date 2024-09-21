@@ -10,12 +10,12 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum task_prio
+typedef enum
 {
     E_TASK_PRIO_MIN = 1U,
     E_TASK_PRIO_CAN = 5U,
     E_TASK_PRIO_MAX = 8U
 
-} en_task_prio_t;
+} en_task_prio;
 
 #endif /* MY_TASK_CFG_H */

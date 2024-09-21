@@ -48,7 +48,7 @@ static void wakeup( void );
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
-static can_irq_callback_t g_can_irq_callback = NULL;
+static fn_can_irq_cbk g_can_irq_cbk = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
@@ -78,9 +78,9 @@ void mcp2515_begin_communication( void )
     set_opmod( OPMOD_NORMAL );
 }
 
-void mcp2515_set_can_irq_callback( const can_irq_callback_t callback )
+void mcp2515_set_can_irq_cbk( const fn_can_irq_cbk cbk )
 {
-    g_can_irq_callback = callback;
+    g_can_irq_cbk = cbk;
 }
 
 void mcp2515_enable_can_irq_fact( const uint8_t fact )
@@ -92,11 +92,11 @@ void mcp2515_enable_can_irq_fact( const uint8_t fact )
 /* -------------------------------------------------------------------------- */
 /* Friend functions                                                           */
 /* -------------------------------------------------------------------------- */
-void mcp2515_can_irq_callback( void )
+void mcp2515_can_irq_cbk( void )
 {
     uint8_t ocurred;
 
-    if( NULL != g_can_irq_callback )
+    if( NULL != g_can_irq_cbk )
     {
         /* Get occurred IRQ factor */
         ocurred = read_reg( REG_CANINTF );
@@ -108,7 +108,7 @@ void mcp2515_can_irq_callback( void )
         modify_reg( REG_CANINTF, ocurred, REG_VAL_00 );
 
         /* Indicate IRQ factor */
-        g_can_irq_callback( ocurred );
+        g_can_irq_cbk( ocurred );
     }
 }
 

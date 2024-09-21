@@ -80,7 +80,7 @@ static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const u
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
 
-void get_rx_buff( const en_can_rx_t can_rx, size_t len, uint8_t *p_buff )
+void get_rx_buff( const en_can_rx can_rx, size_t len, uint8_t *p_buff )
 {
     uint8_t reg_addr;
 
@@ -103,12 +103,12 @@ void get_rx_buff( const en_can_rx_t can_rx, size_t len, uint8_t *p_buff )
     }
 }
 
-void mcp2515_get_can_msg( const en_can_rx_t can_rx, st_can_msg_t *p_can_msg )
+void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 {
     uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
 
     uint32_t can_id;
-    en_can_kind_t can_kind;
+    en_can_kind can_kind;
     uint8_t can_dlc;
     uint8_t can_data[ E_CAN_DATA_QTY ] = { 0 };
 
