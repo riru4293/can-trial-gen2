@@ -36,7 +36,7 @@ typedef enum en_cam_event
 static void task( void *nouse );
 static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
-static void proc_recv_can( const can_rx_t can_rx );
+static void proc_recv_can( const can_rx_t rx );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                  */
@@ -150,7 +150,7 @@ static void reset_controller( void )
     hwd_begin_can_communication();
 }
 
-static void proc_recv_can( const can_rx_t can_rx )
+static void proc_recv_can( const can_rx_t rx )
 {
     typedef void ( *can_recv )( const can_msg_t *p_can_msg );
 
@@ -175,7 +175,7 @@ static void proc_recv_can( const can_rx_t can_rx )
     uint8_t idx;
     uint8_t tbl_qty;
 
-    hwd_get_can_msg( can_rx, &can_msg );
+    hwd_get_can_msg( rx, &can_msg );
 
     tbl_qty = sizeof( proc_tbl ) / sizeof( can_proc_t );
 
