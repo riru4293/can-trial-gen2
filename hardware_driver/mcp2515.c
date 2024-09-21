@@ -341,7 +341,7 @@ static void wakeup( void )
     modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
 }
 
-void get_rx_buff( const can_rx_t can_rx, size_t len, uint8_t *p_buff )
+void get_rx_buff( const en_can_rx_t can_rx, size_t len, uint8_t *p_buff )
 {
     uint8_t reg_addr;
 
@@ -364,7 +364,7 @@ void get_rx_buff( const can_rx_t can_rx, size_t len, uint8_t *p_buff )
     }
 }
 
-void mcp2515_get_can_msg( const can_rx_t can_rx, st_can_msg_t *p_can_msg )
+void mcp2515_get_can_msg( const en_can_rx_t can_rx, st_can_msg_t *p_can_msg )
 {
     uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
 

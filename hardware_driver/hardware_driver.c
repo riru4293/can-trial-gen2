@@ -49,7 +49,7 @@ void hwd_begin_can_communication( void )
     mcp2515_begin_communication();
 }
 
-void hwd_get_can_msg( const can_rx_t rx, st_can_msg_t *p_can_msg )
+void hwd_get_can_msg( const en_can_rx_t rx, st_can_msg_t *p_can_msg )
 {
     mcp2515_get_can_msg( rx, p_can_msg );
 }
