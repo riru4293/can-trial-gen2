@@ -4,6 +4,7 @@ add_library(hardware_driver STATIC
     ${CMAKE_CURRENT_LIST_DIR}/hardware_driver.c
     ${CMAKE_CURRENT_LIST_DIR}/rp2040.c
     ${CMAKE_CURRENT_LIST_DIR}/mcp2515.c
+    ${CMAKE_CURRENT_LIST_DIR}/mcp2515_recv.c
 )
 
 # Add the library
