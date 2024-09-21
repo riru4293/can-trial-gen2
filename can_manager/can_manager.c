@@ -68,13 +68,7 @@ static void task( void *nouse )
 {
     EventBits_t events;
 
-    can_msg_t can_msg = {
-        .id = CAN_ID_INVALID,
-        .kind = E_CAN_KIND_INVALID,
-        .dlc = CAN_DLC_INVALID,
-        .is_data = false,
-        .data = { 0U }
-    };
+    st_can_msg_t can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
 
     while( true )
     {
@@ -152,7 +146,7 @@ static void reset_controller( void )
 
 static void proc_recv_can( const can_rx_t rx )
 {
-    typedef void ( *can_recv )( const can_msg_t *p_can_msg );
+    typedef void ( *can_recv )( const st_can_msg_t *p_can_msg );
 
     typedef struct st_can_proc
     {
@@ -164,13 +158,7 @@ static void proc_recv_can( const can_rx_t rx )
         { 0x477U, NULL }
     };
 
-    can_msg_t can_msg = {
-        .id = CAN_ID_INVALID,
-        .kind = E_CAN_KIND_INVALID,
-        .dlc = CAN_DLC_INVALID,
-        .is_data = false,
-        .data = { 0U }
-    };
+    st_can_msg_t can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
 
     uint8_t idx;
     uint8_t tbl_qty;

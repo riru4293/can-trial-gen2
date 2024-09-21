@@ -364,20 +364,20 @@ void get_rx_buff( const can_rx_t can_rx, size_t len, uint8_t *p_buff )
     }
 }
 
-void mcp2515_get_can_msg( const can_rx_t can_rx, can_msg_t *p_can_msg )
+void mcp2515_get_can_msg( const can_rx_t can_rx, st_can_msg_t *p_can_msg )
 {
     uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
 
     uint32_t can_id;
-    can_kind_t can_kind;
-    uint8_t can_dlc = CAN_DLC_INVALID;
-    uint8_t can_data[ CAN_DLC_MAX ] = { 0 };
+    en_can_kind_t can_kind;
+    uint8_t can_dlc;
+    uint8_t can_data[ E_CAN_DATA_QTY ] = { 0 };
 
     // Get DLC
     p_can_msg->dlc = rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_DLC;
 
     // Get Data
-    if( ( 0U < p_can_msg->dlc ) && ( CAN_DLC_MAX >= p_can_msg->dlc ) )
+    if( ( 0U < p_can_msg->dlc ) && ( E_CAN_DATA_QTY >= p_can_msg->dlc ) )
     {
         memcpy( p_can_msg->data, &rx_buff[ E_CAN_BUFF_DATA_1 ], can_dlc );
     }
@@ -396,22 +396,6 @@ void mcp2515_get_can_msg( const can_rx_t can_rx, can_msg_t *p_can_msg )
         p_can_msg->kind = E_CAN_KIND_EXT;
     }
 
-    // Is Remote?
-    bool is_remote;
-    uint8_t sidl_srr;
-    uint8_t dlc_rtr;
-    if( true == is_std )
-    {
-        sidl_srr = (uint8_t)( rx_buff[ E_CAN_BUFF_SIDL ] & MASKOF_SIDL_SRR );
-        is_remote = ( REG_VAL_SIDL_SRR_RMT == sidl_srr ) ? true : false;
-    }
-    else
-    {
-        dlc_rtr = (uint8_t)( rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_RTR );
-        is_remote = ( REG_VAL_RTR_RMT == sidl_srr ) ? true : false;
-    }
-
-    p_can_msg->is_data = ( false == is_remote) ? true : false;
 
     if( true == is_std )
     {
@@ -443,7 +427,7 @@ static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl )
 
 static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 )
 {
-    uint32_t can_id = CAN_ID_INVALID;
+    uint32_t can_id;
     uint32_t sidl_e0;
     uint32_t sidl_03;
 

@@ -39,7 +39,7 @@ void hwd_reset_can_controller( void );
 void hwd_begin_can_communication( void );
 void hwd_set_can_irq_callback( const can_irq_callback_t callback );
 void hwd_enable_can_irq( const bool enabled );
-void hwd_get_can_msg( const can_rx_t can_rx, can_msg_t *p_can_msg );
+void hwd_get_can_msg( const can_rx_t can_rx, st_can_msg_t *p_can_msg );
 void hwd_enable_can_irq_fact( const uint8_t fact );
 
 #endif /* HARDWARE_DRIVER_H */
