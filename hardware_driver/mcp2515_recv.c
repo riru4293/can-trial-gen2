@@ -86,10 +86,10 @@ void get_rx_buff( const en_can_rx can_rx, size_t len, uint8_t *p_buff )
 
     switch( can_rx )
     {
-    case E_CAN_RX1:
+    case E_CAN_RX_1:
         reg_addr = REG_RXB0SIDH;
         break;
-    case E_CAN_RX2:
+    case E_CAN_RX_2:
         reg_addr = REG_RXB1SIDH;
         break;
     default:

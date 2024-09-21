@@ -84,10 +84,10 @@ static void task( void *nouse )
             if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
                 /* Read CAN message from RX1 */
-                hwd_get_can_msg( E_CAN_RX1, &can_msg );
+                hwd_get_can_msg( E_CAN_RX_1, &can_msg );
 
                 /* Process a received CAN message */
-                proc_recv_can( E_CAN_RX1 );
+                proc_recv_can( E_CAN_RX_1 );
 
                 /* Enable CAN IRQ factor of the RX1 */
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX1 );
@@ -96,10 +96,10 @@ static void task( void *nouse )
             if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
                 /* Read CAN message from RX2 */
-                hwd_get_can_msg( E_CAN_RX2, &can_msg );
+                hwd_get_can_msg( E_CAN_RX_2, &can_msg );
 
                 /* Process a received CAN message */
-                proc_recv_can( E_CAN_RX2 );
+                proc_recv_can( E_CAN_RX_2 );
 
                 /* Enable CAN IRQ factor of the RX2 */
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX2 );

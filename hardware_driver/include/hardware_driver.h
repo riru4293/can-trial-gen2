@@ -12,6 +12,12 @@
 /* -------------------------------------------------------------------------- */
 typedef enum
 {
+    E_CAN_RX_1,
+    E_CAN_RX_2
+} en_can_rx;
+
+typedef enum
+{
     E_CAN_IRQ_FACT_MER = 0x80U,
     E_CAN_IRQ_FACT_WAK = 0x40U,
     E_CAN_IRQ_FACT_ERR = 0x20U,
@@ -23,12 +29,6 @@ typedef enum
 } en_can_irq_fact;
 
 typedef void (*fn_can_irq_cbk)( const uint8_t fact );
-
-typedef enum
-{
-    E_CAN_RX1,
-    E_CAN_RX2
-} en_can_rx;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
