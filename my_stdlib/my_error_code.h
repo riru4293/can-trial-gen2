@@ -6,10 +6,10 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum en_return_code
+typedef enum ret
 {
     E_OK,
     E_NOK
-} ret_cd_t;
+} en_ret_t;
 
 #endif /* MY_ERROR_CODE_H */

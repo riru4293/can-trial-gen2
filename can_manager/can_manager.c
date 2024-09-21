@@ -47,7 +47,7 @@ static EventGroupHandle_t g_evt_hndl = NULL;
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-ret_cd_t cam_create_task( void )
+en_ret_t cam_create_task( void )
 {
     BaseType_t ret = pdFAIL;
 
