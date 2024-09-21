@@ -18,20 +18,32 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum en_can_kind
+typedef enum en_can_msg_kind
 {
-    E_CAN_KIND_INVALID,
-    E_CAN_KIND_STD,
-    E_CAN_KIND_EXT
-} can_kind_t;
+    E_CAN_MSG_KIND_INVALID,
+    E_CAN_MSG_KIND_STD,
+    E_CAN_MSG_KIND_EXT
+} can_msg_kind_t;
 
 typedef struct st_can_msg
 {
     uint32_t id;
-    can_kind_t kind;
+    can_msg_kind_t kind;
     uint8_t dlc;
-    bool is_data;
     uint8_t data[ CAN_DLC_MAX ];
 } can_msg_t;
+
+typedef enum en_can_data_idx
+{
+    E_CAN_DATA_0,
+    E_CAN_DATA_1,
+    E_CAN_DATA_2,
+    E_CAN_DATA_3,
+    E_CAN_DATA_4,
+    E_CAN_DATA_5,
+    E_CAN_DATA_6,
+    E_CAN_DATA_7
+} can_data_idx_t;
+
 
 #endif /* MY_CAN_H */
