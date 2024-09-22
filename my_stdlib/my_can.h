@@ -18,7 +18,8 @@
 typedef enum
 {
     E_CAN_KIND_STD,
-    E_CAN_KIND_EXT
+    E_CAN_KIND_EXT,
+    E_CAN_KIND_INVALID
 } en_can_kind;
 
 typedef enum
@@ -33,6 +34,12 @@ typedef enum
     E_CAN_DATA_8,
     E_CAN_DATA_QTY
 } en_can_data;
+
+typedef enum
+{
+    E_CAN_DLC_MIN = 0U,
+    E_CAN_DLC_MAX = E_CAN_DATA_QTY
+} en_can_dlc;
 
 typedef struct
 {

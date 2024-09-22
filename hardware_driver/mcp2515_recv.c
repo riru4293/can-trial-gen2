@@ -19,29 +19,15 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum
-{
-    E_CAN_BUFF_HDR_1,
-    E_CAN_BUFF_HDR_2,
-    E_CAN_BUFF_HDR_3,
-    E_CAN_BUFF_HDR_4,
-    E_CAN_BUFF_HDR_5,
-    E_CAN_BUFF_DATA_1,
-    E_CAN_BUFF_DATA_2,
-    E_CAN_BUFF_DATA_3,
-    E_CAN_BUFF_DATA_4,
-    E_CAN_BUFF_DATA_5,
-    E_CAN_BUFF_DATA_6,
-    E_CAN_BUFF_DATA_7,
-    E_CAN_BUFF_DATA_8,
-    E_CAN_BUFF_QTY
-} en_can_buff;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static uint32_t read_std_canid( const size_t len, const uint8_t *p_buff );
-static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff );
+static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff );
+static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
+static uint32_t resolve_canid( const en_can_kind kind, const size_t len, const uint8_t *p_buff );
+static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff );
+static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -50,6 +36,33 @@ static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
+void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
+{
+    uint8_t *p_dlc;
+    uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };
+
+    if( NULL != p_can_msg )
+    {
+        /* Read RX buffer */
+        read_rx_buff( can_rx, sizeof( buff ), buff );
+
+        /* Resolve CAN kind */
+        p_can_msg->kind = resolve_can_kind( sizeof( buff ), buff );
+
+        /* Resolve CAN id */
+        p_can_msg->id = resolve_canid( p_can_msg->kind, sizeof( buff ), buff );
+
+        /* Resolve DLC */
+        p_dlc = &( p_can_msg->dlc );
+        *p_dlc = (uint8_t)( buff[ E_CAN_BUFF_HDR_5 ] & MASKOF_DLC );
+        
+        /* Get Data */
+        if( ( E_CAN_DLC_MIN < *p_dlc ) && ( E_CAN_DLC_MAX >= *p_dlc ) )
+        {
+            memcpy( p_can_msg->data, &buff[ E_CAN_BUFF_DATA_1 ], *p_dlc );
+        }
+    }
+}
 
 /* -------------------------------------------------------------------------- */
 /* Friend functions                                                           */
@@ -58,8 +71,7 @@ static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-
-void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
+static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
 {
     switch ( can_rx )
     {
@@ -77,54 +89,49 @@ void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
     }
 }
 
-void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
+static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
 {
-    uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
+    const uint8_t C_STD = 0x00U;
+    en_can_kind kind = E_CAN_KIND_INVALID;
 
-    /* Read RX buffer */
-    read_rx_buff( can_rx, sizeof( rx_buff ), rx_buff );
-
-    uint32_t can_id;
-    en_can_kind can_kind;
-    uint8_t can_dlc;
-    uint8_t can_data[ E_CAN_DATA_QTY ] = { 0 };
-
-
-    // Get DLC
-    p_can_msg->dlc = rx_buff[ E_CAN_BUFF_HDR_5 ] & MASKOF_DLC;
-
-    // Get Data
-    if( ( 0U < p_can_msg->dlc ) && ( E_CAN_DATA_QTY >= p_can_msg->dlc ) )
+    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {
-        memcpy( p_can_msg->data, &rx_buff[ E_CAN_BUFF_DATA_1 ], can_dlc );
+        if ( C_STD == (uint8_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & MASKOF_SIDL_IDE ) )
+        {
+            kind = E_CAN_KIND_STD;
+        }
+        else
+        {
+            kind = E_CAN_KIND_EXT;
+        }
     }
 
-    // Is Standard? Extended?
-    bool is_std;
-    uint8_t sidl_ide;
-    sidl_ide = (uint8_t)( rx_buff[ E_CAN_BUFF_HDR_2 ] & MASKOF_SIDL_IDE );
-    is_std = ( REG_VAL_SIDL_IDE_STD != sidl_ide ) ? true : false;
-    if( true == is_std )
-    {
-        p_can_msg->kind = E_CAN_KIND_STD;
-    }
-    else
-    {
-        p_can_msg->kind = E_CAN_KIND_EXT;
-    }
-
-
-    if( true == is_std )
-    {
-        p_can_msg->id = read_ext_canid( sizeof( rx_buff ), rx_buff );
-    }
-    else
-    {
-        p_can_msg->id = read_ext_canid( sizeof( rx_buff ), rx_buff );
-    }
+    return kind;
 }
 
-static uint32_t read_std_canid( const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_canid( const en_can_kind kind, const size_t len, const uint8_t *p_buff )
+{
+    uint32_t id;
+
+    switch ( kind )
+    {
+    case E_CAN_KIND_STD:
+        id = resolve_std_canid( len, p_buff );
+        break;
+    
+    case E_CAN_KIND_EXT:
+        id = resolve_ext_canid( len, p_buff );
+        break;
+    
+    default:
+        id = CANID_INVALID;
+        break;
+    }
+
+    return id;
+}
+
+static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
     /* CANID layout                                   */
@@ -151,7 +158,7 @@ static uint32_t read_std_canid( const size_t len, const uint8_t *p_buff )
     return can_id;
 }
 
-static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
     /* CANID layout                                   */
@@ -187,63 +194,3 @@ static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff )
 
     return can_id;
 }
-
-// static void set_can_id( const can_kind_t kind, const uint32_t can_id,
-//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
-
-//     /* Fails if illegal arguments. */
-//     if ( is_invalid_canid_kind( kind ) || ( NULL == hdr ) )
-//         return CD_FAILURE;
-
-//     if ( CD_CANID_KIND_STD == kind ) {
-//         /*--------------------------*/
-//         /* Case of standard format. */
-//         /*--------------------------*/
-
-//         /* Fails if too large. */
-//         if ( CD_MAXOF_STD_CANID < can_id )
-//             return CD_FAILURE;
-
-//         hdr[ MCP2515_CANHDR_EID0 ] = 0U;
-//         hdr[ MCP2515_CANHDR_EID8 ] = 0U;
-//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( can_id << 5U ) & 0xE0U );
-//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 3U );
-//     } 
-//     else {
-//         /*--------------------------*/
-//         /* Case of extended format. */
-//         /*--------------------------*/
-
-//         /* Fails if too large. */
-//         if ( CD_MAXOF_EXT_CANID < can_id )
-//             return CD_FAILURE;
-
-//         hdr[ MCP2515_CANHDR_EID0 ] = (uint8_t)can_id;
-//         hdr[ MCP2515_CANHDR_EID8 ] = (uint8_t)( can_id >> 8U );
-//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( ( can_id >> 16U ) & 0x03U )
-//             | MASKOF_SIDL_IDE | ( ( can_id >> 13U ) & 0xE0U ) );
-//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 21U );
-//     }
-// }
-
-// static cd_result_t set_can_dlc( const uint8_t dlc, const bool is_remote,
-//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
-
-//     uint8_t reg_val = 0U;
-
-//     /* Fails if illegal arguments. */
-//     if ( ( CD_CANDLC_MAXOF_LEN < dlc ) || ( NULL == hdr ) )
-//         return CD_FAILURE;
-    
-//     reg_val = (uint8_t)( reg_val | (uint8_t)( dlc & 0xF ) );
-
-//     if( true == is_remote ) {
-
-//         reg_val = (uint8_t)( reg_val | MASKOF_RTR );
-//     }
-
-//     hdr[ MCP2515_CANHDR_DLC ] = reg_val;
-
-//     return CD_SUCCESS;
-// }
-

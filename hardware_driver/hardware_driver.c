@@ -49,9 +49,9 @@ void hwd_begin_can_comm( void )
     mcp2515_begin_communication();
 }
 
-void hwd_get_can_msg( const en_can_rx rx, st_can_msg *p_can_msg )
+void hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 {
-    mcp2515_get_can_msg( rx, p_can_msg );
+    mcp2515_get_can_msg( can_rx, p_can_msg );
 }
 
 void hwd_enable_can_irq_fact( const uint8_t fact )
