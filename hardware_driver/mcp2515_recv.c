@@ -19,13 +19,13 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum en_can_buff
+typedef enum
 {
-    E_CAN_BUFF_SIDH = 0U,
-    E_CAN_BUFF_SIDL,
-    E_CAN_BUFF_EID8,
-    E_CAN_BUFF_EID0,
-    E_CAN_BUFF_DLC,
+    E_CAN_BUFF_HDR_1,
+    E_CAN_BUFF_HDR_2,
+    E_CAN_BUFF_HDR_3,
+    E_CAN_BUFF_HDR_4,
+    E_CAN_BUFF_HDR_5,
     E_CAN_BUFF_DATA_1,
     E_CAN_BUFF_DATA_2,
     E_CAN_BUFF_DATA_3,
@@ -35,34 +35,13 @@ typedef enum en_can_buff
     E_CAN_BUFF_DATA_7,
     E_CAN_BUFF_DATA_8,
     E_CAN_BUFF_QTY
-} can_buff_t;
-
-/* To standard CAN ID */
-#define SIDH_L_SHIFT_TO_STD_CANID       ( (uint8_t)3U )
-#define SIDL_R_SHIFT_TO_STD_CANID       ( (uint8_t)5U )
-
-/* From standard CAN ID */
-#define STD_CANID_MASK_TO_SIDH          ( (uint32_t)0x000007F8U )
-#define STD_CANID_MASK_TO_SIDL          ( (uint32_t)0x00000007U )
-
-#define STD_CANID_R_SHIFT_TO_SIDH       ( SIDH_L_SHIFT_IF_STD_CANID )
-#define STD_CANID_L_SHIFT_TO_SIDL       ( SIDL_R_SHIFT_TO_STD_CANID )
-
-
-/* To Extended CAN ID */
-#define SIDL_E0_MASK_TO_STD_CANID       ( (uint8_t)0xE0U )
-#define SIDL_03_MASK_TO_STD_CANID       ( (uint8_t)0x03U )
-
-#define SIDH_L_SHIFT_TO_EXT_CANID       ( (uint8_t)21U )
-#define SIDL_E0_L_SHIFT_TO_EXT_CANID    ( (uint8_t)13U )
-#define SIDL_03_L_SHIFT_TO_EXT_CANID    ( (uint8_t)16U )
-#define EID8_L_SHIFT_TO_EXT_CANID       ( (uint8_t) 8U )
+} en_can_buff;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl );
-static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 );
+static uint32_t read_std_canid( const size_t len, const uint8_t *p_buff );
+static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -112,7 +91,7 @@ void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 
 
     // Get DLC
-    p_can_msg->dlc = rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_DLC;
+    p_can_msg->dlc = rx_buff[ E_CAN_BUFF_HDR_5 ] & MASKOF_DLC;
 
     // Get Data
     if( ( 0U < p_can_msg->dlc ) && ( E_CAN_DATA_QTY >= p_can_msg->dlc ) )
@@ -123,7 +102,7 @@ void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
     // Is Standard? Extended?
     bool is_std;
     uint8_t sidl_ide;
-    sidl_ide = (uint8_t)( rx_buff[ E_CAN_BUFF_SIDL ] & MASKOF_SIDL_IDE );
+    sidl_ide = (uint8_t)( rx_buff[ E_CAN_BUFF_HDR_2 ] & MASKOF_SIDL_IDE );
     is_std = ( REG_VAL_SIDL_IDE_STD != sidl_ide ) ? true : false;
     if( true == is_std )
     {
@@ -137,46 +116,74 @@ void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 
     if( true == is_std )
     {
-        p_can_msg->id = build_std_canid(
-            rx_buff[ E_CAN_BUFF_SIDH ],
-            rx_buff[ E_CAN_BUFF_SIDL ]
-        );
+        p_can_msg->id = read_ext_canid( sizeof( rx_buff ), rx_buff );
     }
     else
     {
-        p_can_msg->id = build_ext_canid(
-            rx_buff[ E_CAN_BUFF_SIDH ],
-            rx_buff[ E_CAN_BUFF_SIDL ],
-            rx_buff[ E_CAN_BUFF_EID8 ],
-            rx_buff[ E_CAN_BUFF_EID0 ]
-        );
+        p_can_msg->id = read_ext_canid( sizeof( rx_buff ), rx_buff );
     }
 }
 
-static uint32_t build_std_canid( const uint8_t sidh, const uint8_t sidl )
+static uint32_t read_std_canid( const size_t len, const uint8_t *p_buff )
 {
-    uint32_t can_id;
+    /* ---------------------------------------------- */
+    /* CANID layout                                   */
+    /*                                                */
+    /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /* HDR1 |ID11|ID10|ID9 |ID8 |ID7 |ID6 |ID5 |ID4 | */
+    /* HDR2 |ID3 |ID2 |ID1 |-   |-   |-   |-   |-   | */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /*                                                */
+    /* ---------------------------------------------- */
 
-    can_id  = (uint32_t)(  (uint8_t)sidl >> SIDL_R_SHIFT_TO_STD_CANID );
-    can_id |= (uint32_t)( (uint16_t)sidh << SIDH_L_SHIFT_TO_STD_CANID );
+    const uint8_t C_HDR1_BIT_OFFSET = 3U;
+    const uint8_t C_HDR2_BIT_OFFSET = 5U;
+
+    uint32_t can_id = CANID_INVALID;
+
+    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    {
+        can_id  = ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_2 ] >> C_HDR2_BIT_OFFSET );
+        can_id |= ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_1 ] << C_HDR1_BIT_OFFSET );
+    }
 
     return can_id;
 }
 
-static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const uint8_t eid8, const uint8_t eid0 )
+static uint32_t read_ext_canid( const size_t len, const uint8_t *p_buff )
 {
-    uint32_t can_id;
-    uint32_t sidl_e0;
-    uint32_t sidl_03;
+    /* ---------------------------------------------- */
+    /* CANID layout                                   */
+    /*                                                */
+    /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /* HDR1 |ID29|ID28|ID27|ID26|ID25|ID24|ID23|ID22| */
+    /* HDR2 |ID21|ID20|ID19|-   |-   |-   |ID18|ID17| */
+    /* HDR3 |ID16|ID15|ID14|ID13|ID12|ID11|ID10|ID9 | */
+    /* HDR4 |ID8 |ID7 |ID6 |ID5 |ID4 |ID3 |ID2 |ID1 | */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /*                                                */
+    /* ---------------------------------------------- */
 
-    sidl_e0 = (uint32_t)( sidl & SIDL_E0_MASK_TO_STD_CANID );
-    sidl_03 = (uint32_t)( sidl & SIDL_03_MASK_TO_STD_CANID );
+    const uint8_t C_HDR2_BIT0_2_MASK = 0x03U;
+    const uint8_t C_HDR2_BIT5_7_MASK = 0xE0U;
 
-    can_id  = (uint32_t)eid0;
-    can_id |= (uint32_t)( (uint32_t)   eid8 <<    EID8_L_SHIFT_TO_EXT_CANID );
-    can_id |= (uint32_t)(           sidl_03 << SIDL_03_L_SHIFT_TO_EXT_CANID );
-    can_id |= (uint32_t)(           sidl_e0 << SIDL_E0_L_SHIFT_TO_EXT_CANID );
-    can_id |= (uint32_t)( (uint32_t)   sidh <<    SIDH_L_SHIFT_TO_EXT_CANID );
+    const uint8_t C_HDR1_BIT_OFFSET    = 21U;
+    const uint8_t C_HDR2_BIT0_2_OFFSET = 16U;
+    const uint8_t C_HDR2_BIT5_7_OFFSET = 13U;
+    const uint8_t C_HDR3_BIT_OFFSET    =  8U;
+
+    uint32_t can_id = CANID_INVALID;
+
+    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    {
+        can_id  = (uint32_t)p_buff[ E_CAN_BUFF_HDR_4 ];
+        can_id |= ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_3 ] << C_HDR3_BIT_OFFSET );
+        can_id |= ( (uint32_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & C_HDR2_BIT0_2_MASK ) << C_HDR2_BIT0_2_OFFSET );
+        can_id |= ( (uint32_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & C_HDR2_BIT5_7_MASK ) << C_HDR2_BIT5_7_OFFSET );
+        can_id |= ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_1 ] << C_HDR1_BIT_OFFSET );
+    }
 
     return can_id;
 }

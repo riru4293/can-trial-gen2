@@ -164,8 +164,6 @@
 #define MASKOF_RXB0CTRL_BUKT            ( (uint8_t)0x04U )
 #define MASKOF_RXB0CTRL_FILHIT          ( (uint8_t)0x01U )
 #define MASKOF_RXB1CTRL_FILHIT          ( (uint8_t)0x07U )
-#define MASKOF_SIDH_CANID               ( (uint8_t)0XFFU )
-#define MASKOF_SIDL_CANID               ( (uint8_t)0XE0U )
 #define MASKOF_SIDL_IDE                 ( (uint8_t)0x08U )
 #define MASKOF_SIDL_SRR                 ( (uint8_t)0x10U )
 #define MASKOF_RTR                      ( (uint8_t)0x40U )
