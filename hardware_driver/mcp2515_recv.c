@@ -80,26 +80,21 @@ static uint32_t build_ext_canid( const uint8_t sidh, const uint8_t sidl, const u
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
 
-void get_rx_buff( const en_can_rx can_rx, size_t len, uint8_t *p_buff )
+void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
 {
-    uint8_t reg_addr;
-
-    switch( can_rx )
+    switch ( can_rx )
     {
     case E_CAN_RX_1:
-        reg_addr = REG_RXB0SIDH;
+        mcp2515_read_rx1( len, p_buff );
         break;
+    
     case E_CAN_RX_2:
-        reg_addr = REG_RXB1SIDH;
+        mcp2515_read_rx2( len, p_buff );
         break;
+    
     default:
-        // Do nothing
+        /* Do nothing */
         break;
-    };
-
-    if( ( NULL!= p_buff ) && ( E_CAN_BUFF_QTY == len ) )
-    {
-        read_reg_array( reg_addr, len, p_buff );
     }
 }
 
@@ -107,10 +102,14 @@ void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 {
     uint8_t rx_buff[ E_CAN_BUFF_QTY ] = { 0U };
 
+    /* Read RX buffer */
+    read_rx_buff( can_rx, sizeof( rx_buff ), rx_buff );
+
     uint32_t can_id;
     en_can_kind can_kind;
     uint8_t can_dlc;
     uint8_t can_data[ E_CAN_DATA_QTY ] = { 0 };
+
 
     // Get DLC
     p_can_msg->dlc = rx_buff[ E_CAN_BUFF_DLC ] & MASKOF_DLC;

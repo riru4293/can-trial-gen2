@@ -171,4 +171,24 @@
 #define MASKOF_RTR                      ( (uint8_t)0x40U )
 #define MASKOF_DLC                      ( (uint8_t)0x0FU )
 
+/* -------------------------------------------------------------------------- */
+/* Prototype                                                                  */
+/* -------------------------------------------------------------------------- */
+void mcp2515_begin_spi( void );
+void mcp2515_end_spi( void );
+
+void mcp2515_write_spi_array( const size_t len, const uint8_t const *p_buff );
+void mcp2515_write_spi( const uint8_t val );
+void mcp2515_read_spi_array( const size_t len, uint8_t *p_buff );
+uint8_t mcp2515_read_spi( void );
+
+void mcp2515_write_reg_array( const uint8_t addr, const size_t len, const uint8_t const *p_buff );
+void mcp2515_write_reg( const uint8_t addr, const uint8_t val );
+void mcp2515_modify_reg( const uint8_t addr, const uint8_t mask, const uint8_t val );
+void mcp2515_read_reg_array( const uint8_t addr, const size_t len, uint8_t *p_buff );
+uint8_t mcp2515_read_reg( const uint8_t addr );
+
+void mcp2515_read_rx1( const size_t len, uint8_t *p_buff );
+void mcp2515_read_rx2( const size_t len, uint8_t *p_buff );
+
 #endif /* MCP2515_REGISTER_H */
