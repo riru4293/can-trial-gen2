@@ -77,14 +77,14 @@ static void task( void *nouse )
     {
         events = xEventGroupWaitBits( g_evt_hndl, E_CAM_EVT_ALL, pdTRUE, pdFALSE, portMAX_DELAY );
 
-        if( (EventBits_t)E_CAM_EVT_RESET != ( (EventBits_t)E_CAM_EVT_RESET & events ) )
+        if( (EventBits_t)E_CAM_EVT_RESET == ( (EventBits_t)E_CAM_EVT_RESET & events ) )
         {
             /* Reset CAN controller */
             reset_controller();
         }
         else
         {
-            if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
+            if( (EventBits_t)E_CAM_EVT_RECV_RX1 == ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_1 );
@@ -93,7 +93,7 @@ static void task( void *nouse )
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX1 );
             }
 
-            if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
+            if( (EventBits_t)E_CAM_EVT_RECV_RX2 == ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_2 );
