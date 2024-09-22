@@ -1,6 +1,9 @@
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
+/* System */
+#include <stdio.h>
+
 /* FreeRTOS */
 #include <FreeRTOS.h>
 #include <task.h>
@@ -68,7 +71,7 @@ static void task( void *nouse )
 {
     EventBits_t events;
 
-    st_can_msg can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
+    reset_controller();
 
     while( true )
     {
@@ -83,9 +86,6 @@ static void task( void *nouse )
         {
             if( (EventBits_t)E_CAM_EVT_RECV_RX1 != ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
             {
-                /* Read CAN message from RX1 */
-                hwd_get_can_msg( E_CAN_RX_1, &can_msg );
-
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_1 );
 
@@ -95,9 +95,6 @@ static void task( void *nouse )
 
             if( (EventBits_t)E_CAM_EVT_RECV_RX2 != ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
             {
-                /* Read CAN message from RX2 */
-                hwd_get_can_msg( E_CAN_RX_2, &can_msg );
-
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_2 );
 
@@ -137,6 +134,9 @@ static void reset_controller( void )
     /* Set IRQ handler */
     hwd_set_can_irq_cbk( irq_handler );
 
+    /* Enable CAN IRQ factor */
+    hwd_enable_can_irq_fact( E_CAN_IRQ_FACT_RX1 | E_CAN_IRQ_FACT_RX2 );
+
     /* Enable CAN IRQ */
     hwd_enable_can_irq( true );
 
@@ -146,32 +146,30 @@ static void reset_controller( void )
 
 static void proc_recv_can( const en_can_rx can_rx )
 {
-    typedef void ( *can_recv )( const st_can_msg *p_can_msg );
+    st_can_msg can_msg = { CANID_INVALID, E_CAN_KIND_INVALID, E_CAN_DLC_MIN, { 0U } };
 
-    typedef struct st_can_proc
+    switch ( can_rx )
     {
-        uint32_t id;
-        can_recv recv_func;
-    } can_proc_t;
+    case E_CAN_RX_1:
+    case E_CAN_RX_2:
+        hwd_get_can_msg( can_rx, &can_msg );
 
-    const can_proc_t proc_tbl[] = {
-        { 0x477U, NULL }
-    };
-
-    st_can_msg can_msg = { 0U, E_CAN_KIND_STD, 0U, { 0U } };
-
-    uint8_t idx;
-    uint8_t tbl_qty;
-
-    hwd_get_can_msg( can_rx, &can_msg );
-
-    tbl_qty = sizeof( proc_tbl ) / sizeof( can_proc_t );
-
-    for( idx = 0U; idx < tbl_qty; idx++ )
-    {
-        if( ( can_msg.id == proc_tbl[idx].id ) && ( NULL != proc_tbl[idx].recv_func ) )
-        {
-            proc_tbl[idx].recv_func( &can_msg );
-        }
+        printf("ID: %00X, DLC: %d, DATA: %0X %0X %0X %0X %0X %0X %0X %0X\n"
+            , can_msg.id
+            , can_msg.dlc
+            , can_msg.data[E_CAN_DATA_1]
+            , can_msg.data[E_CAN_DATA_2]
+            , can_msg.data[E_CAN_DATA_3]
+            , can_msg.data[E_CAN_DATA_4]
+            , can_msg.data[E_CAN_DATA_5]
+            , can_msg.data[E_CAN_DATA_6]
+            , can_msg.data[E_CAN_DATA_7]
+            , can_msg.data[E_CAN_DATA_8]
+        );
+        break;
+    
+    default:
+        /* Do nothing */
+        break;
     }
 }
