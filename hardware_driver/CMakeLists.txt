@@ -10,10 +10,10 @@ add_library(hardware_driver STATIC
 
 # Add the library
 target_link_libraries(hardware_driver
-    # My standard library
-    PUBLIC my_stdlib
     # RP2040
     PRIVATE hardware_spi
+    # Common include
+    PUBLIC common_include
 )
 
 # Add the include directory
