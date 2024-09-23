@@ -75,7 +75,7 @@ void rp2040_light_led_1( const bool on )
     gpio_put( LED_1_PORT, lv );
 }
 
-void rp2040_enable_can_irq( const bool enabled )
+void rp2040_enable_irq_handling( const bool enabled )
 {
     gpio_set_irq_enabled_with_callback(
         CAN_CTRL_PORT_IRQ, GPIO_IRQ_LEVEL_LOW, enabled, irq_cbk );

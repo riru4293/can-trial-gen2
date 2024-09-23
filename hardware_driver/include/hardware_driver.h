@@ -4,9 +4,6 @@
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
-/* RP2040 */
-#include <pico/types.h>
-
 /* My standard library */
 #include <my_can.h>
 
@@ -42,11 +39,14 @@ typedef void (*fn_can_irq_cbk)( const uint8_t fact );
 /* -------------------------------------------------------------------------- */
 void hwd_init_hardware( void );
 void hwd_light_led_1( const bool on );
+
 void hwd_reset_can_ctrl( void );
-void hwd_begin_can_comm( void );
+
 void hwd_set_can_irq_cbk( const fn_can_irq_cbk cbk );
-void hwd_enable_can_irq( const bool enabled );
-void hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg );
 void hwd_enable_can_irq_fact( const uint8_t fact );
+void hwd_enable_irq_handling( const bool enabled );
+
+void hwd_start_can_comm( void );
+void hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg );
 
 #endif /* HARDWARE_DRIVER_H */

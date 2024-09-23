@@ -64,7 +64,7 @@ void mcp2515_reset( void )
     mcp2515_write_reg( REG_RXB1CTRL, 0x00 );
 }
 
-void mcp2515_begin_communication( void )
+void mcp2515_start_can_comm( void )
 {
     set_opmod( OPMOD_NORMAL );
 }

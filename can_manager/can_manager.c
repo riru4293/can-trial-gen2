@@ -140,8 +140,8 @@ static void reset_controller( void )
     /* Enable CAN IRQ */
     hwd_enable_can_irq( true );
 
-    /* Begin CAN communication */
-    hwd_begin_can_comm();
+    /* Start CAN communication */
+    hwd_start_can_comm();
 }
 
 static void proc_recv_can( const en_can_rx can_rx )

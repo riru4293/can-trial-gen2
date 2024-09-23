@@ -39,14 +39,14 @@ void hwd_set_can_irq_cbk( const fn_can_irq_cbk cbk )
     mcp2515_set_can_irq_cbk( cbk );
 }
 
-void hwd_enable_can_irq( const bool enabled )
+void hwd_enable_irq_handling( const bool enabled )
 {
-    rp2040_enable_can_irq( enabled );
+    rp2040_enable_irq_handling( enabled );
 }
 
-void hwd_begin_can_comm( void )
+void hwd_start_can_comm( void )
 {
-    mcp2515_begin_communication();
+    mcp2515_start_can_comm();
 }
 
 void hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
