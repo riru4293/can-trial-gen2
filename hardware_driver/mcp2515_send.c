@@ -23,6 +23,8 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
+static void set_std_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff );
+static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -31,6 +33,70 @@
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
+en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg )
+{
+    const uint8_t KIND_STD = ( REG_VAL_00 & REG_MASK_SIDL_IDE );
+    const uint8_t KIND_EXT = ( REG_VAL_FF & REG_MASK_SIDL_IDE );
+    en_cdf_err result = E_NOK;
+    uint8_t p_buff[ E_CAN_BUFF_QTY ] = { 0U };
+    en_cdf_can_kind kind;
+    uint32_t id;
+    uint8_t dlc;
+
+    if( NULL != p_can_msg )
+    {
+        id = p_can_msg->id;
+        kind = p_can_msg->kind;
+
+        switch ( kind )
+        {
+        case E_CDF_CAN_KIND_STD:
+            if( CDF_STD_CAN_ID_MAX >= id )
+            {
+                p_buff[ E_CAN_BUFF_HDR_2 ] = KIND_STD;
+                set_std_can_id( id, sizeof( p_buff ), p_buff );
+                result = E_OK;
+            }
+            break;
+        
+        case E_CDF_CAN_KIND_EXT:
+            if( CDF_EXT_CAN_ID_MAX >= id )
+            {
+                p_buff[ E_CAN_BUFF_HDR_2 ] = KIND_EXT;
+                set_ext_can_id( id, sizeof( p_buff ), p_buff );
+                result = E_OK;
+            }
+            break;
+        
+        default:
+            /* Do nothing */
+            break;
+        }
+
+        if( E_OK == result )
+        {
+            dlc = p_can_msg->dlc;
+
+            if( E_CDF_CAN_DLC_MAX >= dlc )
+            {
+                /* Set DLC */
+                p_buff[ E_CAN_BUFF_DATA_1 ] |= (uint8_t)( dlc & REG_MASK_DLC );
+
+                /* Set Data */
+                if( E_CDF_CAN_DLC_MIN < dlc )
+                {
+                    memcpy( &p_buff[ E_CAN_BUFF_DATA_1 ], &p_can_msg->data, dlc );
+                }
+            }
+            else
+            {
+                result = E_NOK;
+            }
+        }
+    }
+
+    return result;
+}
 
 /* -------------------------------------------------------------------------- */
 /* Friend functions                                                           */
@@ -39,61 +105,63 @@
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-// static void set_can_id( const can_kind_t kind, const uint32_t can_id,
-//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
+static void set_std_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff )
+{
+    /* ---------------------------------------------- */
+    /* CAN_ID layout                                  */
+    /*                                                */
+    /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /* HDR1 |ID11|ID10|ID9 |ID8 |ID7 |ID6 |ID5 |ID4 | */
+    /* HDR2 |ID3 |ID2 |ID1 |-   |-   |-   |-   |-   | */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /*                                                */
+    /* ---------------------------------------------- */
 
-//     /* Fails if illegal arguments. */
-//     if ( is_invalid_canid_kind( kind ) || ( NULL == hdr ) )
-//         return CD_FAILURE;
+    const uint8_t C_HDR2_SID_MASK = 0xE0U;
 
-//     if ( CD_CAN_ID_KIND_STD == kind ) {
-//         /*--------------------------*/
-//         /* Case of standard format. */
-//         /*--------------------------*/
+    const uint8_t C_HDR1_OFFSET = 3U;
+    const uint8_t C_HDR2_OFFSET = 5U;
 
-//         /* Fails if too large. */
-//         if ( CD_MAXOF_STD_CAN_ID < can_id )
-//             return CD_FAILURE;
+    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    {
+        p_buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
+        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+            (uint8_t)( (uint8_t)( can_id << C_HDR2_OFFSET ) & C_HDR2_SID_MASK );
+    }
+}
 
-//         hdr[ MCP2515_CANHDR_EID0 ] = 0U;
-//         hdr[ MCP2515_CANHDR_EID8 ] = 0U;
-//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( can_id << 5U ) & 0xE0U );
-//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 3U );
-//     } 
-//     else {
-//         /*--------------------------*/
-//         /* Case of extended format. */
-//         /*--------------------------*/
+static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff )
+{
+    /* ---------------------------------------------- */
+    /* CAN_ID layout                                  */
+    /*                                                */
+    /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /* HDR1 |ID29|ID28|ID27|ID26|ID25|ID24|ID23|ID22| */
+    /* HDR2 |ID21|ID20|ID19|-   |-   |-   |ID18|ID17| */
+    /* HDR3 |ID16|ID15|ID14|ID13|ID12|ID11|ID10|ID9 | */
+    /* HDR4 |ID8 |ID7 |ID6 |ID5 |ID4 |ID3 |ID2 |ID1 | */
+    /*      +----+----+----+----+----+----+----+----+ */
+    /*                                                */
+    /* ---------------------------------------------- */
 
-//         /* Fails if too large. */
-//         if ( CD_MAXOF_EXT_CAN_ID < can_id )
-//             return CD_FAILURE;
+    const uint8_t C_HDR2_EID_MASK = 0x03U;
+    const uint8_t C_HDR2_SID_MASK = 0xE0U;
 
-//         hdr[ MCP2515_CANHDR_EID0 ] = (uint8_t)can_id;
-//         hdr[ MCP2515_CANHDR_EID8 ] = (uint8_t)( can_id >> 8U );
-//         hdr[ MCP2515_CANHDR_SIDL ] = (uint8_t)( ( ( can_id >> 16U ) & 0x03U )
-//             | MASKOF_SIDL_IDE | ( ( can_id >> 13U ) & 0xE0U ) );
-//         hdr[ MCP2515_CANHDR_SIDH ] = (uint8_t)( can_id >> 21U );
-//     }
-// }
+    const uint8_t C_HDR1_OFFSET     = 21U;
+    const uint8_t C_HDR2_EID_OFFSET = 16U;
+    const uint8_t C_HDR2_SID_OFFSET = 13U;
+    const uint8_t C_HDR3_OFFSET     =  8U;
 
-// static cd_result_t set_can_dlc( const uint8_t dlc, const bool is_remote,
-//     uint8_t hdr[ MCP2515_CANHDR_NUMOF_ITEMS ] ) {
-
-//     uint8_t reg_val = 0U;
-
-//     /* Fails if illegal arguments. */
-//     if ( ( CD_CANDLC_MAXOF_LEN < dlc ) || ( NULL == hdr ) )
-//         return CD_FAILURE;
-    
-//     reg_val = (uint8_t)( reg_val | (uint8_t)( dlc & 0xF ) );
-
-//     if( true == is_remote ) {
-
-//         reg_val = (uint8_t)( reg_val | MASKOF_RTR );
-//     }
-
-//     hdr[ MCP2515_CANHDR_DLC ] = reg_val;
-
-//     return CD_SUCCESS;
-// }
+    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    {
+        p_buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
+        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+            (uint8_t)( (uint8_t)( can_id >> C_HDR2_EID_OFFSET ) & C_HDR2_EID_MASK );
+        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+            (uint8_t)( (uint8_t)( can_id >> C_HDR2_SID_OFFSET ) & C_HDR2_SID_MASK );
+        p_buff[ E_CAN_BUFF_DATA_3 ]  = (uint8_t)( can_id >> C_HDR3_OFFSET );
+        p_buff[ E_CAN_BUFF_DATA_4 ]  = (uint8_t)can_id;
+    }
+}

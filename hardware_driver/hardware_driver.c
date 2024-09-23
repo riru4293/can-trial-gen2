@@ -53,14 +53,14 @@ void hwd_stop_can_comm( void )
     hwd_reset_can_ctrl();
 }
 
-void hwd_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg )
+en_cdf_err hwd_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg )
 {
-    mcp2515_get_can_msg( can_rx, p_can_msg );
+    return mcp2515_get_can_msg( can_rx, p_can_msg );
 }
 
-void hwd_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg )
+en_cdf_err hwd_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg )
 {
-    mcp2515_set_can_msg( can_tx, p_can_msg );
+    return mcp2515_set_can_msg( can_tx, p_can_msg );
 }
 
 void hwd_enable_can_irq_fact( const uint8_t fact )

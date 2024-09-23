@@ -5,6 +5,7 @@
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
 #include <cdf_can.h>
+#include <cdf_err.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -54,7 +55,7 @@ void hwd_enable_irq_handling( const bool enabled );
 
 void hwd_start_can_comm( void );
 void hwd_stop_can_comm( void );
-void hwd_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg );
-void hwd_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg );
+en_cdf_err hwd_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg );
+en_cdf_err hwd_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg );
 
 #endif /* HWD_API_H */

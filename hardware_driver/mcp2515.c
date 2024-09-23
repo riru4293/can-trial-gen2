@@ -248,7 +248,7 @@ static uint8_t get_opmod( void )
     uint8_t opmod;
 
     canstat = mcp2515_read_reg( REG_CANSTAT );
-    opmod = canstat & MASKOF_OPMOD;
+    opmod = canstat & REG_MASK_OPMOD;
 
     return opmod;
 }
@@ -269,11 +269,11 @@ static void set_opmod( const uint8_t opmod )
         /* Clear waked up interruption if to be sleep. */
         if ( OPMOD_SLEEP == opmod )
         {
-            mcp2515_modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
+            mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
         }
 
         /* Set operation mode */
-        mcp2515_modify_reg( REG_CANCTRL, MASKOF_OPMOD, opmod );
+        mcp2515_modify_reg( REG_CANCTRL, REG_MASK_OPMOD, opmod );
 
         /* Wait until applied. */
         return wait_until_change_opmod( opmod );
@@ -283,22 +283,22 @@ static void set_opmod( const uint8_t opmod )
 static void wakeup( void )
 {
     /* Disable wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTE, MASKOF_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 
     /* Clear wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 
     /* Enable wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTE, MASKOF_CANINT_WAKIF, REG_VAL_FF );
+    mcp2515_modify_reg( REG_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
 
     /* Set wake up IRQ. */
-    mcp2515_modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_FF );
+    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
 
     /* Temporarily switch to listen-only mode. */
     set_opmod( OPMOD_LISTENONLY );
 
     /* Clear wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTF, MASKOF_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 }
 
 static void read_rx( const uint8_t spicmd, const size_t len, uint8_t *p_buff )
