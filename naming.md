@@ -1,6 +1,7 @@
 略称
 definition          --
 std                 standard
+ext                 extended
 common              --
 none                none
 cd                  code
@@ -21,6 +22,11 @@ disabled            --
 comm                communication
 start               --
 stop                --
+addr                address
+reg                 register
+
+Length
+配列長を引数で指定する場合、nとする。
 
 
 Enum

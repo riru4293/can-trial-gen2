@@ -75,16 +75,29 @@ en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
+
+static void read_rx( const uint8_t spicmd, const size_t n, uint8_t buff[n] )
+{
+    /* Begin SPI communication */
+    mcp2515_begin_spi();
+
+    /* Read RX buffer */
+    mcp2515_write_spi( spicmd );
+    mcp2515_read_spi_array( n, buff );
+
+    /* End SPI communication */
+    mcp2515_end_spi();
+}
 static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
 {
     switch ( can_rx )
     {
     case E_CAN_RX_1:
-        mcp2515_read_rx1( len, p_buff );
+        read_rx( SPICMD_READ_RX1, len, p_buff );
         break;
     
     case E_CAN_RX_2:
-        mcp2515_read_rx2( len, p_buff );
+        read_rx( SPICMD_READ_RX2, len, p_buff );
         break;
     
     default:
