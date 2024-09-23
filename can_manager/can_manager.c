@@ -23,15 +23,19 @@
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
-typedef enum en_cam_event
+typedef enum
 {
     E_CAM_EVT_RESET     = 0x000001U,
     E_CAM_EVT_RECV_RX1  = 0x000002U,
     E_CAM_EVT_RECV_RX2  = 0x000004U,
+    E_CAM_EVT_RECV_TX1  = 0x000008U,
+    E_CAM_EVT_RECV_TX2  = 0x000010U,
+    E_CAM_EVT_RECV_TX3  = 0x000020U,
     E_CAM_EVT_ALL       = (uint)(
         E_CAM_EVT_RESET | E_CAM_EVT_RECV_RX1 | E_CAM_EVT_RECV_RX2
+        | E_CAM_EVT_RECV_TX1 | E_CAM_EVT_RECV_TX2 | E_CAM_EVT_RECV_TX3
     )
-} cam_event_t;
+} en_cam_event;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
@@ -108,18 +112,31 @@ static void task( void *nouse )
 
 static void irq_handler( const uint8_t fact )
 {
+    typedef struct
+    {
+        en_can_irq_fact fact;
+        en_cam_event evt;
+    } st_fact_to_evt;
+
+    const st_fact_to_evt T_CONV[] =
+    {
+        { E_CAN_IRQ_FACT_RX1, E_CAM_EVT_RECV_RX1 },
+        { E_CAN_IRQ_FACT_RX2, E_CAM_EVT_RECV_RX2 },
+        { E_CAN_IRQ_FACT_TX1, E_CAM_EVT_RECV_TX1 },
+        { E_CAN_IRQ_FACT_TX2, E_CAM_EVT_RECV_TX2 },
+        { E_CAN_IRQ_FACT_TX3, E_CAM_EVT_RECV_TX3 }
+    };
+
+    uint8_t idx;
     BaseType_t hptw = pdFALSE;
 
-    if( (uint8_t)E_CAN_IRQ_FACT_RX1 == (uint8_t)( (uint8_t)E_CAN_IRQ_FACT_RX1 & fact ) )
+    for( idx = 0U; idx < sizeof( T_CONV ); idx++ )
     {
-        /* Cause event CAN received by RX1 */
-        xEventGroupSetBitsFromISR( g_evt_hndl, E_CAM_EVT_RECV_RX1, &hptw );
-    }
-
-    if( (uint8_t)E_CAN_IRQ_FACT_RX1 == (uint8_t)( (uint8_t)E_CAN_IRQ_FACT_RX2 & fact ) )
-    {
-        /* Cause event CAN received by RX2 */
-        xEventGroupSetBitsFromISR( g_evt_hndl, E_CAM_EVT_RECV_RX2, &hptw );
+        if( T_CONV[ idx ].fact == (uint8_t)T_CONV[ idx ].fact & fact )
+        {
+            /* Cause an event per factor */
+            xEventGroupSetBitsFromISR( g_evt_hndl, T_CONV[ idx ].evt, &hptw );
+        }
     }
 
     /* Exit to context switch if necessary */
@@ -135,10 +152,10 @@ static void reset_controller( void )
     hwd_set_can_irq_cbk( irq_handler );
 
     /* Enable CAN IRQ factor */
-    hwd_enable_can_irq_fact( E_CAN_IRQ_FACT_RX1 | E_CAN_IRQ_FACT_RX2 );
+    hwd_enable_can_irq_fact( E_CAN_IRQ_FACT_ALL );
 
     /* Enable CAN IRQ */
-    hwd_enable_can_irq( true );
+    hwd_enable_irq_handling( true );
 
     /* Start CAN communication */
     hwd_start_can_comm();
