@@ -19,14 +19,14 @@
 #include <cdf_can.h>
 
 /* Driver */
-#include <hardware_driver.h>
+#include <hwd_api.h>
 
 /* My module */
 #include <ntm_task.h>
 
 int main( void )
 {
-    hwd_init_hardware();
+    hwd_init();
 
     ntm_create_task();
 

@@ -5,14 +5,14 @@
 #include <pico/stdlib.h>
 
 /* Driver */
-#include <hardware_driver.h>
+#include <hwd_api.h>
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-void hwd_init_hardware( void )
+void hwd_init( void )
 {
     /* Initialize standard I/O */
     stdio_init_all();
@@ -34,7 +34,7 @@ void hwd_reset_can_ctrl( void )
     mcp2515_reset();
 }
 
-void hwd_set_can_irq_cbk( const fn_can_irq_cbk cbk )
+void hwd_set_can_irq_cbk( const fn_hwd_can_irq_cbk cbk )
 {
     mcp2515_set_can_irq_cbk( cbk );
 }
@@ -49,7 +49,7 @@ void hwd_start_can_comm( void )
     mcp2515_start_can_comm();
 }
 
-void hwd_get_can_msg( const en_can_rx can_rx, st_cdf_can_msg *p_can_msg )
+void hwd_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg )
 {
     mcp2515_get_can_msg( can_rx, p_can_msg );
 }
