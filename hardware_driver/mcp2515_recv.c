@@ -22,7 +22,7 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void read_rx_buff( const en_hwd_can_rx can_rx, const size_t len, uint8_t *p_buff );
+static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff );
 static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff );
@@ -35,7 +35,7 @@ static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_errno mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_can_msg *p_can_msg )
+en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 {
     en_errno result = E_NOK;
     uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };
@@ -75,15 +75,15 @@ en_errno mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_can_msg *p_can_msg 
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-static void read_rx_buff( const en_hwd_can_rx can_rx, const size_t len, uint8_t *p_buff )
+static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
 {
     switch ( can_rx )
     {
-    case E_HWD_CAN_RX_1:
+    case E_CAN_RX_1:
         mcp2515_read_rx1( len, p_buff );
         break;
     
-    case E_HWD_CAN_RX_2:
+    case E_CAN_RX_2:
         mcp2515_read_rx2( len, p_buff );
         break;
     

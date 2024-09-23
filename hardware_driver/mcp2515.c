@@ -39,7 +39,7 @@ static void read_rx( const uint8_t spicmd, const size_t len, uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
-static fn_hwd_can_irq_cbk g_can_irq_cbk = NULL;
+static fn_can_irq_cbk g_can_irq_cbk = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
@@ -69,7 +69,7 @@ void mcp2515_start_can_comm( void )
     set_opmod( OPMOD_NORMAL );
 }
 
-void mcp2515_set_can_irq_cbk( const fn_hwd_can_irq_cbk cbk )
+void mcp2515_set_can_irq_cbk( const fn_can_irq_cbk cbk )
 {
     g_can_irq_cbk = cbk;
 }

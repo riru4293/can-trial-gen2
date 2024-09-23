@@ -33,7 +33,7 @@ static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_errno mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_can_msg *p_can_msg )
+en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_msg )
 {
     const uint8_t KIND_STD = ( REG_VAL_00 & REG_MASK_SIDL_IDE );
     const uint8_t KIND_EXT = ( REG_VAL_FF & REG_MASK_SIDL_IDE );

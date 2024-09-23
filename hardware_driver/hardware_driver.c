@@ -28,12 +28,12 @@ void hwd_turn_on_led_1( const bool is_on )
     rp2040_turn_on_led_1( is_on );
 }
 
-void hwd_reset_can_ctrl( void )
+void hwd_reset_can_controller( void )
 {
     mcp2515_reset();
 }
 
-void hwd_set_can_irq_cbk( const fn_hwd_can_irq_cbk cbk )
+void hwd_set_can_irq_cbk( const fn_can_irq_cbk cbk )
 {
     mcp2515_set_can_irq_cbk( cbk );
 }
@@ -50,15 +50,15 @@ void hwd_start_can_comm( void )
 
 void hwd_stop_can_comm( void )
 {
-    hwd_reset_can_ctrl();
+    hwd_reset_can_controller();
 }
 
-en_errno hwd_get_can_msg( const en_hwd_can_rx can_rx, st_can_msg *p_can_msg )
+en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 {
     return mcp2515_get_can_msg( can_rx, p_can_msg );
 }
 
-en_errno hwd_set_can_msg( const en_hwd_can_tx can_tx, const st_can_msg *p_can_msg )
+en_errno hwd_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_msg )
 {
     return mcp2515_set_can_msg( can_tx, p_can_msg );
 }
