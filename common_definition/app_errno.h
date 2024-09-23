@@ -1,5 +1,5 @@
-#ifndef CDF_ERR_H
-#define CDF_ERR_H
+#ifndef APP_ERRNO_H
+#define APP_ERRNO_H
 
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
@@ -16,6 +16,6 @@ typedef enum
 {
     E_OK,
     E_NOK
-} en_cdf_err;
+} en_errno;
 
-#endif /* CDF_ERR_H */
+#endif /* APP_ERRNO_H */

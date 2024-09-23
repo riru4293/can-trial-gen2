@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* My standard library */
-#include <cdf_err.h>
+#include <app_errno.h>
 
 /* Driver */
 #include <private/mcp2515.h>
@@ -33,13 +33,13 @@ static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg *p_can_msg )
+en_errno mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_can_msg *p_can_msg )
 {
     const uint8_t KIND_STD = ( REG_VAL_00 & REG_MASK_SIDL_IDE );
     const uint8_t KIND_EXT = ( REG_VAL_FF & REG_MASK_SIDL_IDE );
-    en_cdf_err result = E_NOK;
+    en_errno result = E_NOK;
     uint8_t p_buff[ E_CAN_BUFF_QTY ] = { 0U };
-    en_cdf_can_kind kind;
+    en_can_kind kind;
     uint32_t id;
     uint8_t dlc;
 
@@ -50,8 +50,8 @@ en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg
 
         switch ( kind )
         {
-        case E_CDF_CAN_KIND_STD:
-            if( CDF_STD_CAN_ID_MAX >= id )
+        case E_CAN_KIND_STD:
+            if( STD_CAN_ID_MAX >= id )
             {
                 p_buff[ E_CAN_BUFF_HDR_2 ] = KIND_STD;
                 set_std_can_id( id, sizeof( p_buff ), p_buff );
@@ -59,8 +59,8 @@ en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg
             }
             break;
         
-        case E_CDF_CAN_KIND_EXT:
-            if( CDF_EXT_CAN_ID_MAX >= id )
+        case E_CAN_KIND_EXT:
+            if( EXT_CAN_ID_MAX >= id )
             {
                 p_buff[ E_CAN_BUFF_HDR_2 ] = KIND_EXT;
                 set_ext_can_id( id, sizeof( p_buff ), p_buff );
@@ -77,13 +77,13 @@ en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg
         {
             dlc = p_can_msg->dlc;
 
-            if( E_CDF_CAN_DLC_MAX >= dlc )
+            if( E_CAN_DLC_MAX >= dlc )
             {
                 /* Set DLC */
                 p_buff[ E_CAN_BUFF_DATA_1 ] |= (uint8_t)( dlc & REG_MASK_DLC_DLC );
 
                 /* Set Data */
-                if( E_CDF_CAN_DLC_MIN < dlc )
+                if( E_CAN_DLC_MIN < dlc )
                 {
                     memcpy( &p_buff[ E_CAN_BUFF_DATA_1 ], &p_can_msg->data, dlc );
                 }

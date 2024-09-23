@@ -4,8 +4,7 @@
 /* System */
 #include <string.h>
 
-/* My standard library */
-#include <cdf_err.h>
+#include <app_errno.h>
 
 /* Driver */
 #include <private/mcp2515.h>
@@ -24,8 +23,8 @@
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
 static void read_rx_buff( const en_hwd_can_rx can_rx, const size_t len, uint8_t *p_buff );
-static en_cdf_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
-static uint32_t resolve_can_id( const en_cdf_can_kind kind, const size_t len, const uint8_t *p_buff );
+static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
+static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff );
 
@@ -36,9 +35,9 @@ static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_cdf_err mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_can_msg )
+en_errno mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_can_msg *p_can_msg )
 {
-    en_cdf_err result = E_NOK;
+    en_errno result = E_NOK;
     uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };
     uint8_t *p_dlc;
 
@@ -58,7 +57,7 @@ en_cdf_err mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_ca
         *p_dlc = (uint8_t)( buff[ E_CAN_BUFF_HDR_5 ] & REG_MASK_DLC_DLC );
         
         /* Get Data */
-        if( ( E_CDF_CAN_DLC_MIN < *p_dlc ) && ( E_CDF_CAN_DLC_MAX >= *p_dlc ) )
+        if( ( E_CAN_DLC_MIN < *p_dlc ) && ( E_CAN_DLC_MAX >= *p_dlc ) )
         {
             memcpy( p_can_msg->data, &buff[ E_CAN_BUFF_DATA_1 ], *p_dlc );
         }
@@ -94,42 +93,42 @@ static void read_rx_buff( const en_hwd_can_rx can_rx, const size_t len, uint8_t 
     }
 }
 
-static en_cdf_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
+static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
 {
     const uint8_t C_STD = 0x00U;
-    en_cdf_can_kind kind = E_CDF_CAN_KIND_INVALID;
+    en_can_kind kind = E_CAN_KIND_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {
         if ( C_STD == (uint8_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & REG_MASK_SIDL_IDE ) )
         {
-            kind = E_CDF_CAN_KIND_STD;
+            kind = E_CAN_KIND_STD;
         }
         else
         {
-            kind = E_CDF_CAN_KIND_EXT;
+            kind = E_CAN_KIND_EXT;
         }
     }
 
     return kind;
 }
 
-static uint32_t resolve_can_id( const en_cdf_can_kind kind, const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const uint8_t *p_buff )
 {
     uint32_t id;
 
     switch ( kind )
     {
-    case E_CDF_CAN_KIND_STD:
+    case E_CAN_KIND_STD:
         id = resolve_std_can_id( len, p_buff );
         break;
     
-    case E_CDF_CAN_KIND_EXT:
+    case E_CAN_KIND_EXT:
         id = resolve_ext_can_id( len, p_buff );
         break;
     
     default:
-        id = CDF_CAN_ID_INVALID;
+        id = CAN_ID_INVALID;
         break;
     }
 
@@ -152,7 +151,7 @@ static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff )
     const uint8_t C_HDR1_OFFSET = 3U;
     const uint8_t C_HDR2_OFFSET = 5U;
 
-    uint32_t can_id = CDF_CAN_ID_INVALID;
+    uint32_t can_id = CAN_ID_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {
@@ -186,7 +185,7 @@ static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff )
     const uint8_t C_HDR2_SID_OFFSET = 13U;
     const uint8_t C_HDR3_OFFSET     =  8U;
 
-    uint32_t can_id = CDF_CAN_ID_INVALID;
+    uint32_t can_id = CAN_ID_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {

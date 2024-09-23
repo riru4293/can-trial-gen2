@@ -16,7 +16,7 @@
 #include <queue.h>
 
 /* My standard library */
-#include <cdf_can.h>
+#include <can.h>
 
 /* Driver */
 #include <hwd_api.h>

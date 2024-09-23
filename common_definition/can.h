@@ -1,5 +1,5 @@
-#ifndef CDF_CAN_H
-#define CDF_CAN_H
+#ifndef CAN_H
+#define CAN_H
 
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
@@ -10,45 +10,46 @@
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
-#define CDF_STD_CAN_ID_MAX       ( (uint32_t)0x000007FFU )
-#define CDF_EXT_CAN_ID_MAX       ( (uint32_t)0x1FFFFFFFU )
-#define CDF_CAN_ID_INVALID       ( (uint32_t)0xFFFFFFFFU )
+#define STD_CAN_ID_MAX       ( (uint32_t)0x000007FFU )
+#define EXT_CAN_ID_MAX       ( (uint32_t)0x1FFFFFFFU )
+#define CAN_ID_INVALID       ( (uint32_t)0xFFFFFFFFU )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
 /* -------------------------------------------------------------------------- */
 typedef enum
 {
-    E_CDF_CAN_KIND_STD,
-    E_CDF_CAN_KIND_EXT,
-    E_CDF_CAN_KIND_INVALID
-} en_cdf_can_kind;
+    E_CAN_KIND_STD,
+    E_CAN_KIND_EXT,
+    E_CAN_KIND_INVALID
+} en_can_kind;
 
 typedef enum
 {
-    E_CDF_CAN_DATA_1,
-    E_CDF_CAN_DATA_2,
-    E_CDF_CAN_DATA_3,
-    E_CDF_CAN_DATA_4,
-    E_CDF_CAN_DATA_5,
-    E_CDF_CAN_DATA_6,
-    E_CDF_CAN_DATA_7,
-    E_CDF_CAN_DATA_8,
-    E_CDF_CAN_DATA_QTY
-} en_cdf_can_data;
+    E_CAN_DATA_1,
+    E_CAN_DATA_2,
+    E_CAN_DATA_3,
+    E_CAN_DATA_4,
+    E_CAN_DATA_5,
+    E_CAN_DATA_6,
+    E_CAN_DATA_7,
+    E_CAN_DATA_8,
+    E_CAN_DATA_QTY
+} en_can_data;
 
 typedef enum
 {
-    E_CDF_CAN_DLC_MIN = 0U,
-    E_CDF_CAN_DLC_MAX = E_CDF_CAN_DATA_QTY
-} en_cdf_can_dlc;
+    E_CAN_DLC_NONE = 0U,
+    E_CAN_DLC_MIN = E_CAN_DLC_NONE,
+    E_CAN_DLC_MAX = E_CAN_DATA_QTY
+} en_can_dlc;
 
 typedef struct
 {
     uint32_t id;
-    en_cdf_can_kind kind;
+    en_can_kind kind;
     uint8_t dlc;
-    uint8_t data[ E_CDF_CAN_DATA_QTY ];
-} st_cdf_can_msg;
+    uint8_t data[ E_CAN_DATA_QTY ];
+} st_can_msg;
 
-#endif /* CDF_CAN_H */
+#endif /* CAN_H */

@@ -9,9 +9,9 @@
 #include <task.h>
 #include <event_groups.h>
 
-#include <cdf_err.h>
+#include <app_errno.h>
 #include <hwd_api.h>
-#include <cdf_task.h>
+#include <task_cfg.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -51,7 +51,7 @@ static EventGroupHandle_t g_evt_hndl = NULL;
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_cdf_err ntm_create_task( void )
+en_errno ntm_create_task( void )
 {
     BaseType_t ret = pdFAIL;
 
@@ -59,7 +59,7 @@ en_cdf_err ntm_create_task( void )
 
     if( NULL != g_evt_hndl )
     {
-        ret = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_CDF_TASK_PRIO_CAN, &g_tsk_hndl );
+        ret = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_TASK_PRIO_CAN, &g_tsk_hndl );
     }
 
     return ( pdPASS == ret ) ? E_OK : E_NOK;
@@ -163,7 +163,7 @@ static void reset_controller( void )
 
 static void proc_recv_can( const en_hwd_can_rx can_rx )
 {
-    st_cdf_can_msg can_msg = { CDF_CAN_ID_INVALID, E_CDF_CAN_KIND_INVALID, E_CDF_CAN_DLC_MIN, { 0U } };
+    st_can_msg can_msg = { CAN_ID_INVALID, E_CAN_KIND_INVALID, E_CAN_DLC_MIN, { 0U } };
 
     switch ( can_rx )
     {
@@ -174,14 +174,14 @@ static void proc_recv_can( const en_hwd_can_rx can_rx )
         printf("ID: %00X, DLC: %d, DATA: %0X %0X %0X %0X %0X %0X %0X %0X\n"
             , can_msg.id
             , can_msg.dlc
-            , can_msg.data[E_CDF_CAN_DATA_1]
-            , can_msg.data[E_CDF_CAN_DATA_2]
-            , can_msg.data[E_CDF_CAN_DATA_3]
-            , can_msg.data[E_CDF_CAN_DATA_4]
-            , can_msg.data[E_CDF_CAN_DATA_5]
-            , can_msg.data[E_CDF_CAN_DATA_6]
-            , can_msg.data[E_CDF_CAN_DATA_7]
-            , can_msg.data[E_CDF_CAN_DATA_8]
+            , can_msg.data[E_CAN_DATA_1]
+            , can_msg.data[E_CAN_DATA_2]
+            , can_msg.data[E_CAN_DATA_3]
+            , can_msg.data[E_CAN_DATA_4]
+            , can_msg.data[E_CAN_DATA_5]
+            , can_msg.data[E_CAN_DATA_6]
+            , can_msg.data[E_CAN_DATA_7]
+            , can_msg.data[E_CAN_DATA_8]
         );
         break;
     
