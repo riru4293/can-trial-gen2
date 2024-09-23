@@ -9,12 +9,10 @@
 #include <task.h>
 #include <event_groups.h>
 
-/* My standard library */
+/* My modules */
 #include <cdf_err.h>
-#include <cdf_task.h>
-
-/* Driver */
 #include <hardware_driver.h>
+#include <cdf_task.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
