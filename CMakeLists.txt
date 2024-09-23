@@ -43,7 +43,7 @@ pico_sdk_init()
 add_subdirectory(free_rtos)         # FreeRTOS
 add_subdirectory(common_definition) # cdf: Common definition
 add_subdirectory(hardware_driver)   # hwd: Operate the hardware
-add_subdirectory(can_manager)       # net: Control Area Network manager
+add_subdirectory(network_manager)   # net: Control Area Network manager
 
 add_executable(can_trial ${CMAKE_CURRENT_LIST_DIR}/main.c)
 
@@ -54,7 +54,7 @@ target_link_libraries(can_trial
     # Driver
     PRIVATE hardware_driver
     # My module
-    PRIVATE can_manager
+    PRIVATE network_manager
 )
 
 pico_set_program_name(can_trial "can_trial")

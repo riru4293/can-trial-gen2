@@ -25,17 +25,17 @@
 /* -------------------------------------------------------------------------- */
 typedef enum
 {
-    E_CAM_EVT_RESET     = 0x000001U,
-    E_CAM_EVT_RECV_RX1  = 0x000002U,
-    E_CAM_EVT_RECV_RX2  = 0x000004U,
-    E_CAM_EVT_RECV_TX1  = 0x000008U,
-    E_CAM_EVT_RECV_TX2  = 0x000010U,
-    E_CAM_EVT_RECV_TX3  = 0x000020U,
-    E_CAM_EVT_ALL       = (uint)(
-        E_CAM_EVT_RESET | E_CAM_EVT_RECV_RX1 | E_CAM_EVT_RECV_RX2
-        | E_CAM_EVT_RECV_TX1 | E_CAM_EVT_RECV_TX2 | E_CAM_EVT_RECV_TX3
+    E_NTM_EVT_RESET     = 0x000001U,
+    E_NTM_EVT_RECV_RX1  = 0x000002U,
+    E_NTM_EVT_RECV_RX2  = 0x000004U,
+    E_NTM_EVT_RECV_TX1  = 0x000008U,
+    E_NTM_EVT_RECV_TX2  = 0x000010U,
+    E_NTM_EVT_RECV_TX3  = 0x000020U,
+    E_NTM_EVT_ALL       = (uint32_t)(
+        E_NTM_EVT_RESET | E_NTM_EVT_RECV_RX1 | E_NTM_EVT_RECV_RX2
+        | E_NTM_EVT_RECV_TX1 | E_NTM_EVT_RECV_TX2 | E_NTM_EVT_RECV_TX3
     )
-} en_cam_event;
+} en_ntm_event;
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
@@ -54,7 +54,7 @@ static EventGroupHandle_t g_evt_hndl = NULL;
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_cdf_err cam_create_task( void )
+en_cdf_err ntm_create_task( void )
 {
     BaseType_t ret = pdFAIL;
 
@@ -79,16 +79,16 @@ static void task( void *nouse )
 
     while( true )
     {
-        events = xEventGroupWaitBits( g_evt_hndl, E_CAM_EVT_ALL, pdTRUE, pdFALSE, portMAX_DELAY );
+        events = xEventGroupWaitBits( g_evt_hndl, E_NTM_EVT_ALL, pdTRUE, pdFALSE, portMAX_DELAY );
 
-        if( (EventBits_t)E_CAM_EVT_RESET == ( (EventBits_t)E_CAM_EVT_RESET & events ) )
+        if( (EventBits_t)E_NTM_EVT_RESET == ( (EventBits_t)E_NTM_EVT_RESET & events ) )
         {
             /* Reset CAN controller */
             reset_controller();
         }
         else
         {
-            if( (EventBits_t)E_CAM_EVT_RECV_RX1 == ( (EventBits_t)E_CAM_EVT_RECV_RX1 & events ) )
+            if( (EventBits_t)E_NTM_EVT_RECV_RX1 == ( (EventBits_t)E_NTM_EVT_RECV_RX1 & events ) )
             {
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_1 );
@@ -97,7 +97,7 @@ static void task( void *nouse )
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX1 );
             }
 
-            if( (EventBits_t)E_CAM_EVT_RECV_RX2 == ( (EventBits_t)E_CAM_EVT_RECV_RX2 & events ) )
+            if( (EventBits_t)E_NTM_EVT_RECV_RX2 == ( (EventBits_t)E_NTM_EVT_RECV_RX2 & events ) )
             {
                 /* Process a received CAN message */
                 proc_recv_can( E_CAN_RX_2 );
@@ -115,16 +115,16 @@ static void irq_handler( const uint8_t fact )
     typedef struct
     {
         en_can_irq_fact fact;
-        en_cam_event evt;
+        en_ntm_event evt;
     } st_fact_to_evt;
 
     const st_fact_to_evt T_CONV[] =
     {
-        { E_CAN_IRQ_FACT_RX1, E_CAM_EVT_RECV_RX1 },
-        { E_CAN_IRQ_FACT_RX2, E_CAM_EVT_RECV_RX2 },
-        { E_CAN_IRQ_FACT_TX1, E_CAM_EVT_RECV_TX1 },
-        { E_CAN_IRQ_FACT_TX2, E_CAM_EVT_RECV_TX2 },
-        { E_CAN_IRQ_FACT_TX3, E_CAM_EVT_RECV_TX3 }
+        { E_CAN_IRQ_FACT_RX1, E_NTM_EVT_RECV_RX1 },
+        { E_CAN_IRQ_FACT_RX2, E_NTM_EVT_RECV_RX2 },
+        { E_CAN_IRQ_FACT_TX1, E_NTM_EVT_RECV_TX1 },
+        { E_CAN_IRQ_FACT_TX2, E_NTM_EVT_RECV_TX2 },
+        { E_CAN_IRQ_FACT_TX3, E_NTM_EVT_RECV_TX3 }
     };
 
     uint8_t idx;

@@ -1,15 +1,14 @@
-#ifndef CAN_MANAGER_H
-#define CAN_MANAGER_H
+#ifndef NTM_TASK_H
+#define NTM_TASK_H
 
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
-/* My standard library */
 #include <cdf_err.h>
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-en_cdf_err cam_create_task( void );
+en_cdf_err ntm_create_task( void );
 
-#endif /* CAN_MANAGER_H */
+#endif /* NTM_TASK_H */

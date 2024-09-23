@@ -22,13 +22,13 @@
 #include <hardware_driver.h>
 
 /* My module */
-#include <can_manager.h>
+#include <ntm_task.h>
 
 int main( void )
 {
     hwd_init_hardware();
 
-    cam_create_task();
+    ntm_create_task();
 
     vTaskStartScheduler();
 
