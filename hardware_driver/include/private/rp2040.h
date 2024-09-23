@@ -12,7 +12,7 @@
 /* -------------------------------------------------------------------------- */
 void rp2040_init_led_1_hw( void );
 void rp2040_init_spi_1_hw( void );
-void rp2040_light_led_1( const bool lit );
+void rp2040_turn_on_led_1( const bool lit );
 void rp2040_enable_irq_handling( const bool enabled );
 void rp2040_begin_spi_1( void );
 void rp2040_end_spi_1( void );

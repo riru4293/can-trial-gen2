@@ -24,9 +24,9 @@ void hwd_init_hardware( void )
     rp2040_init_spi_1_hw();
 }
 
-void hwd_light_led_1( const bool on )
+void hwd_turn_on_led_1( const bool is_on )
 {
-    rp2040_light_led_1( on );
+    rp2040_turn_on_led_1( is_on );
 }
 
 void hwd_reset_can_ctrl( void )

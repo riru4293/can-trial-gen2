@@ -38,9 +38,9 @@ typedef void (*fn_can_irq_cbk)( const uint8_t fact );
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
 void hwd_init_hardware( void );
-void hwd_light_led_1( const bool on );
-
 void hwd_reset_can_ctrl( void );
+
+void hwd_turn_on_led_1( const bool is_on );
 
 void hwd_set_can_irq_cbk( const fn_can_irq_cbk cbk );
 void hwd_enable_can_irq_fact( const uint8_t fact );

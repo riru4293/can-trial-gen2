@@ -68,9 +68,9 @@ void rp2040_init_spi_1_hw( void )
     gpio_set_dir( SPI_1_PORT_CS, GPIO_OUT );
 }
 
-void rp2040_light_led_1( const bool on )
+void rp2040_turn_on_led_1( const bool is_on )
 {
-    const bool lv = ( true == on ) ? GPIO_LEVEL_HIGH : GPIO_LEVEL_LOW;
+    const bool lv = ( true == is_on ) ? GPIO_LEVEL_HIGH : GPIO_LEVEL_LOW;
 
     gpio_put( LED_1_PORT, lv );
 }
