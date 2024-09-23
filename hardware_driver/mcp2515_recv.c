@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* My standard library */
-#include <my_error_code.h>
+#include <cdf_err.h>
 
 /* Driver */
 #include <private/mcp2515.h>
@@ -24,8 +24,8 @@
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
 static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff );
-static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
-static uint32_t resolve_canid( const en_can_kind kind, const size_t len, const uint8_t *p_buff );
+static en_cdf_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
+static uint32_t resolve_canid( const en_cdf_can_kind kind, const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff );
 static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff );
 
@@ -36,7 +36,7 @@ static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
+void mcp2515_get_can_msg( const en_can_rx can_rx, st_cdf_can_msg *p_can_msg )
 {
     uint8_t *p_dlc;
     uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };
@@ -57,7 +57,7 @@ void mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
         *p_dlc = (uint8_t)( buff[ E_CAN_BUFF_HDR_5 ] & MASKOF_DLC );
         
         /* Get Data */
-        if( ( E_CAN_DLC_MIN < *p_dlc ) && ( E_CAN_DLC_MAX >= *p_dlc ) )
+        if( ( E_CDF_CAN_DLC_MIN < *p_dlc ) && ( E_CDF_CAN_DLC_MAX >= *p_dlc ) )
         {
             memcpy( p_can_msg->data, &buff[ E_CAN_BUFF_DATA_1 ], *p_dlc );
         }
@@ -89,42 +89,42 @@ static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_b
     }
 }
 
-static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
+static en_cdf_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
 {
     const uint8_t C_STD = 0x00U;
-    en_can_kind kind = E_CAN_KIND_INVALID;
+    en_cdf_can_kind kind = E_CDF_CAN_KIND_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {
         if ( C_STD == (uint8_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & MASKOF_SIDL_IDE ) )
         {
-            kind = E_CAN_KIND_STD;
+            kind = E_CDF_CAN_KIND_STD;
         }
         else
         {
-            kind = E_CAN_KIND_EXT;
+            kind = E_CDF_CAN_KIND_EXT;
         }
     }
 
     return kind;
 }
 
-static uint32_t resolve_canid( const en_can_kind kind, const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_canid( const en_cdf_can_kind kind, const size_t len, const uint8_t *p_buff )
 {
     uint32_t id;
 
     switch ( kind )
     {
-    case E_CAN_KIND_STD:
+    case E_CDF_CAN_KIND_STD:
         id = resolve_std_canid( len, p_buff );
         break;
     
-    case E_CAN_KIND_EXT:
+    case E_CDF_CAN_KIND_EXT:
         id = resolve_ext_canid( len, p_buff );
         break;
     
     default:
-        id = CANID_INVALID;
+        id = CDF_CAN_ID_INVALID;
         break;
     }
 
@@ -134,7 +134,7 @@ static uint32_t resolve_canid( const en_can_kind kind, const size_t len, const u
 static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
-    /* CANID layout                                   */
+    /* CAN_ID layout                                   */
     /*                                                */
     /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
     /*      +----+----+----+----+----+----+----+----+ */
@@ -147,7 +147,7 @@ static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff )
     const uint8_t C_HDR1_BIT_OFFSET = 3U;
     const uint8_t C_HDR2_BIT_OFFSET = 5U;
 
-    uint32_t can_id = CANID_INVALID;
+    uint32_t can_id = CDF_CAN_ID_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {
@@ -161,7 +161,7 @@ static uint32_t resolve_std_canid( const size_t len, const uint8_t *p_buff )
 static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
-    /* CANID layout                                   */
+    /* CAN_ID layout                                   */
     /*                                                */
     /*       bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0  */
     /*      +----+----+----+----+----+----+----+----+ */
@@ -181,7 +181,7 @@ static uint32_t resolve_ext_canid( const size_t len, const uint8_t *p_buff )
     const uint8_t C_HDR2_BIT5_7_OFFSET = 13U;
     const uint8_t C_HDR3_BIT_OFFSET    =  8U;
 
-    uint32_t can_id = CANID_INVALID;
+    uint32_t can_id = CDF_CAN_ID_INVALID;
 
     if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
     {

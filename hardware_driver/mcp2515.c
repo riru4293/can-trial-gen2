@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* My standard library */
-#include <my_error_code.h>
+#include <cdf_err.h>
 
 /* Driver */
 #include <private/rp2040.h>

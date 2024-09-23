@@ -5,11 +5,11 @@
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
 /* My standard library */
-#include <my_error_code.h>
+#include <cdf_err.h>
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-en_err cam_create_task( void );
+en_cdf_err cam_create_task( void );
 
 #endif /* CAN_MANAGER_H */

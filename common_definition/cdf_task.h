@@ -1,7 +1,9 @@
-#ifndef MY_TASK_CFG_H
-#define MY_TASK_CFG_H
+#ifndef CDF_TASK_H
+#define CDF_TASK_H
 
-#include <pico/types.h>
+/* -------------------------------------------------------------------------- */
+/* Include                                                                    */
+/* -------------------------------------------------------------------------- */
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -12,10 +14,10 @@
 /* -------------------------------------------------------------------------- */
 typedef enum
 {
-    E_TASK_PRIO_MIN = 1U,
-    E_TASK_PRIO_CAN = 5U,
-    E_TASK_PRIO_MAX = 8U
+    E_CDF_TASK_PRIO_MIN = 1U,
+    E_CDF_TASK_PRIO_CAN = 5U,
+    E_CDF_TASK_PRIO_MAX = 8U
 
 } en_task_prio;
 
-#endif /* MY_TASK_CFG_H */
+#endif /* CDF_TASK_H */

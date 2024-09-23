@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* My standard library */
-#include <my_error_code.h>
+#include <cdf_err.h>
 
 /* Driver */
 #include <private/mcp2515.h>
@@ -46,13 +46,13 @@
 //     if ( is_invalid_canid_kind( kind ) || ( NULL == hdr ) )
 //         return CD_FAILURE;
 
-//     if ( CD_CANID_KIND_STD == kind ) {
+//     if ( CD_CAN_ID_KIND_STD == kind ) {
 //         /*--------------------------*/
 //         /* Case of standard format. */
 //         /*--------------------------*/
 
 //         /* Fails if too large. */
-//         if ( CD_MAXOF_STD_CANID < can_id )
+//         if ( CD_MAXOF_STD_CAN_ID < can_id )
 //             return CD_FAILURE;
 
 //         hdr[ MCP2515_CANHDR_EID0 ] = 0U;
@@ -66,7 +66,7 @@
 //         /*--------------------------*/
 
 //         /* Fails if too large. */
-//         if ( CD_MAXOF_EXT_CANID < can_id )
+//         if ( CD_MAXOF_EXT_CAN_ID < can_id )
 //             return CD_FAILURE;
 
 //         hdr[ MCP2515_CANHDR_EID0 ] = (uint8_t)can_id;
