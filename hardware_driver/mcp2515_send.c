@@ -80,7 +80,7 @@ en_cdf_err mcp2515_set_can_msg( const en_hwd_can_tx can_tx, const st_cdf_can_msg
             if( E_CDF_CAN_DLC_MAX >= dlc )
             {
                 /* Set DLC */
-                p_buff[ E_CAN_BUFF_DATA_1 ] |= (uint8_t)( dlc & REG_MASK_DLC );
+                p_buff[ E_CAN_BUFF_DATA_1 ] |= (uint8_t)( dlc & REG_MASK_DLC_DLC );
 
                 /* Set Data */
                 if( E_CDF_CAN_DLC_MIN < dlc )

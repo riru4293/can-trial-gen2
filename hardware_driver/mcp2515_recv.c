@@ -55,7 +55,7 @@ en_cdf_err mcp2515_get_can_msg( const en_hwd_can_rx can_rx, st_cdf_can_msg *p_ca
 
         /* Resolve DLC */
         p_dlc = &( p_can_msg->dlc );
-        *p_dlc = (uint8_t)( buff[ E_CAN_BUFF_HDR_5 ] & REG_MASK_DLC );
+        *p_dlc = (uint8_t)( buff[ E_CAN_BUFF_HDR_5 ] & REG_MASK_DLC_DLC );
         
         /* Get Data */
         if( ( E_CDF_CAN_DLC_MIN < *p_dlc ) && ( E_CDF_CAN_DLC_MAX >= *p_dlc ) )

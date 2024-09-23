@@ -57,11 +57,11 @@ void mcp2515_reset( void )
 
     /* 受信バッファ１設定。すべて受信。RX1への切り替え禁止。*/
     //configure_rx_1_filter
-    mcp2515_write_reg( REG_RXB0CTRL, 0x60 );
+    mcp2515_write_reg( REG_ADR_RXB0CTRL, 0x60 );
 
     /* 受信バッファ２設定。フィルタ一致のみ受信。 */
     //configure_rx_2_filter
-    mcp2515_write_reg( REG_RXB1CTRL, 0x00 );
+    mcp2515_write_reg( REG_ADR_RXB1CTRL, 0x00 );
 }
 
 void mcp2515_start_can_comm( void )
@@ -77,7 +77,7 @@ void mcp2515_set_can_irq_cbk( const fn_hwd_can_irq_cbk cbk )
 void mcp2515_enable_can_irq_fact( const uint8_t fact )
 {
     /* Enable IRQ factor */
-    mcp2515_modify_reg( REG_CANINTE, fact, REG_VAL_FF );
+    mcp2515_modify_reg( REG_ADR_CANINTE, fact, REG_VAL_FF );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -90,13 +90,13 @@ void mcp2515_can_irq_cbk( void )
     if( NULL != g_can_irq_cbk )
     {
         /* Get occurred IRQ factor */
-        ocurred = mcp2515_read_reg( REG_CANINTF );
+        ocurred = mcp2515_read_reg( REG_ADR_CANINTF );
 
         /* Disable re-cause occurred IRQ factor */
-        mcp2515_modify_reg( REG_CANINTE, ocurred, REG_VAL_00 );
+        mcp2515_modify_reg( REG_ADR_CANINTE, ocurred, REG_VAL_00 );
 
         /* Clear occurred IRQ factor */
-        mcp2515_modify_reg( REG_CANINTF, ocurred, REG_VAL_00 );
+        mcp2515_modify_reg( REG_ADR_CANINTF, ocurred, REG_VAL_00 );
 
         /* Indicate IRQ factor */
         g_can_irq_cbk( ocurred );
@@ -229,7 +229,7 @@ static void configure_can_baudrate( void )
     };
 
     /* Write baudrate configuration to register */
-    mcp2515_write_reg_array( REG_CNF3, sizeof( baudrate ), baudrate );
+    mcp2515_write_reg_array( REG_ADR_CNF3, sizeof( baudrate ), baudrate );
 }
 
 static void wait_until_change_opmod( const uint8_t expect_opmod )
@@ -247,7 +247,7 @@ static uint8_t get_opmod( void )
     uint8_t canstat;
     uint8_t opmod;
 
-    canstat = mcp2515_read_reg( REG_CANSTAT );
+    canstat = mcp2515_read_reg( REG_ADR_CANSTAT );
     opmod = canstat & REG_MASK_OPMOD;
 
     return opmod;
@@ -269,11 +269,11 @@ static void set_opmod( const uint8_t opmod )
         /* Clear waked up interruption if to be sleep. */
         if ( OPMOD_SLEEP == opmod )
         {
-            mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
+            mcp2515_modify_reg( REG_ADR_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
         }
 
         /* Set operation mode */
-        mcp2515_modify_reg( REG_CANCTRL, REG_MASK_OPMOD, opmod );
+        mcp2515_modify_reg( REG_ADR_CANCTRL, REG_MASK_OPMOD, opmod );
 
         /* Wait until applied. */
         return wait_until_change_opmod( opmod );
@@ -283,22 +283,22 @@ static void set_opmod( const uint8_t opmod )
 static void wakeup( void )
 {
     /* Disable wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_ADR_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 
     /* Clear wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_ADR_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 
     /* Enable wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
+    mcp2515_modify_reg( REG_ADR_CANINTE, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
 
     /* Set wake up IRQ. */
-    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
+    mcp2515_modify_reg( REG_ADR_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_FF );
 
     /* Temporarily switch to listen-only mode. */
     set_opmod( OPMOD_LISTENONLY );
 
     /* Clear wake up IRQ */
-    mcp2515_modify_reg( REG_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
+    mcp2515_modify_reg( REG_ADR_CANINTF, REG_MASK_CANINT_WAKIF, REG_VAL_00 );
 }
 
 static void read_rx( const uint8_t spicmd, const size_t len, uint8_t *p_buff )
