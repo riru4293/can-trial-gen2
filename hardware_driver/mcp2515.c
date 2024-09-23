@@ -10,8 +10,8 @@
 /* Driver */
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
-#include <private/mcp2515_spicmd.h>
-#include <private/mcp2515_register.h>
+#include <private/mcp2515_spi_cmd.h>
+#include <private/mcp2515_reg.h>
 #include <private/can_irq.h>
 
 /* -------------------------------------------------------------------------- */
@@ -129,7 +129,7 @@ void mcp2515_write_reg_array( const uint8_t addr, const size_t n, const uint8_t 
     mcp2515_begin_spi();
 
     /* Write to MCP2515 registers */
-    mcp2515_write_spi( SPICMD_WRITE_REG );
+    mcp2515_write_spi( SPI_CMD_WRITE_REG );
     mcp2515_write_spi( addr );
     mcp2515_write_spi_array( n, buff );
 
@@ -148,7 +148,7 @@ void mcp2515_modify_reg( const uint8_t addr, const uint8_t mask, const uint8_t v
     mcp2515_begin_spi();
     
     /* Write to MCP2515 register with bit mask */
-    mcp2515_write_spi( SPICMD_MODBITS_REG );
+    mcp2515_write_spi( SPI_CMD_MODBITS_REG );
     mcp2515_write_spi( addr );
     mcp2515_write_spi( mask );
     mcp2515_write_spi( val );
@@ -173,7 +173,7 @@ void mcp2515_read_reg_array( const uint8_t addr, const size_t n, uint8_t buff[n]
     mcp2515_begin_spi();
 
     /* Write to MCP2515 registers */
-    mcp2515_write_spi( SPICMD_READ_REG );
+    mcp2515_write_spi( SPI_CMD_READ_REG );
     mcp2515_write_spi( addr );
     mcp2515_read_spi_array( n, buff );
 
@@ -199,7 +199,7 @@ static void exec_cmd_reset( void )
     mcp2515_begin_spi();
 
     /* Execute reset command */
-    mcp2515_write_spi( SPICMD_RESET );
+    mcp2515_write_spi( SPI_CMD_RESET );
 
     /* End SPI communication */
     mcp2515_end_spi();

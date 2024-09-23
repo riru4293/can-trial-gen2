@@ -1,5 +1,5 @@
-#ifndef MCP2515_REGISTER_H
-#define MCP2515_REGISTER_H
+#ifndef MCP2515_REG_H
+#define MCP2515_REG_H
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -191,4 +191,4 @@ void mcp2515_modify_reg( const uint8_t addr, const uint8_t mask, const uint8_t v
 void mcp2515_read_reg_array( const uint8_t addr, const size_t n, uint8_t buff[n] );
 uint8_t mcp2515_read_reg( const uint8_t addr );
 
-#endif /* MCP2515_REGISTER_H */
+#endif /* MCP2515_REG_H */

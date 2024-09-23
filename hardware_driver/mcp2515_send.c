@@ -9,8 +9,8 @@
 
 /* Driver */
 #include <private/mcp2515.h>
-#include <private/mcp2515_spicmd.h>
-#include <private/mcp2515_register.h>
+#include <private/mcp2515_spi_cmd.h>
+#include <private/mcp2515_reg.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */

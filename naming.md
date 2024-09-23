@@ -24,6 +24,10 @@ start               --
 stop                --
 addr                address
 reg                 register
+req                 request
+read                --
+write               --
+
 
 Length
 配列長を引数で指定する場合、nとする。

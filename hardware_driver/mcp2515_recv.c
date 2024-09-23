@@ -8,8 +8,8 @@
 
 /* Driver */
 #include <private/mcp2515.h>
-#include <private/mcp2515_spicmd.h>
-#include <private/mcp2515_register.h>
+#include <private/mcp2515_spi_cmd.h>
+#include <private/mcp2515_reg.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
@@ -22,11 +22,11 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff );
-static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff );
-static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const uint8_t *p_buff );
-static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff );
-static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff );
+static void read_rx_buff( const en_can_rx can_rx, const size_t n, uint8_t *p_buff );
+static en_can_kind resolve_can_kind( const size_t n, const uint8_t *p_buff );
+static uint32_t resolve_can_id( const en_can_kind kind, const size_t n, const uint8_t *p_buff );
+static uint32_t resolve_std_can_id( const size_t n, const uint8_t *p_buff );
+static uint32_t resolve_ext_can_id( const size_t n, const uint8_t *p_buff );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -88,16 +88,16 @@ static void read_rx( const uint8_t spicmd, const size_t n, uint8_t buff[n] )
     /* End SPI communication */
     mcp2515_end_spi();
 }
-static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_buff )
+static void read_rx_buff( const en_can_rx can_rx, const size_t n, uint8_t *p_buff )
 {
     switch ( can_rx )
     {
     case E_CAN_RX_1:
-        read_rx( SPICMD_READ_RX1, len, p_buff );
+        read_rx( SPI_CMD_READ_RX_1, n, p_buff );
         break;
     
     case E_CAN_RX_2:
-        read_rx( SPICMD_READ_RX2, len, p_buff );
+        read_rx( SPI_CMD_READ_RX_2, n, p_buff );
         break;
     
     default:
@@ -106,12 +106,12 @@ static void read_rx_buff( const en_can_rx can_rx, const size_t len, uint8_t *p_b
     }
 }
 
-static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
+static en_can_kind resolve_can_kind( const size_t n, const uint8_t *p_buff )
 {
     const uint8_t C_STD = 0x00U;
     en_can_kind kind = E_CAN_KIND_INVALID;
 
-    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    if( ( E_CAN_BUFF_QTY == n ) && ( NULL != p_buff ) )
     {
         if ( C_STD == (uint8_t)( p_buff[ E_CAN_BUFF_HDR_2 ] & REG_MASK_SIDL_IDE ) )
         {
@@ -126,18 +126,18 @@ static en_can_kind resolve_can_kind( const size_t len, const uint8_t *p_buff )
     return kind;
 }
 
-static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_can_id( const en_can_kind kind, const size_t n, const uint8_t *p_buff )
 {
     uint32_t id;
 
     switch ( kind )
     {
     case E_CAN_KIND_STD:
-        id = resolve_std_can_id( len, p_buff );
+        id = resolve_std_can_id( n, p_buff );
         break;
     
     case E_CAN_KIND_EXT:
-        id = resolve_ext_can_id( len, p_buff );
+        id = resolve_ext_can_id( n, p_buff );
         break;
     
     default:
@@ -148,7 +148,7 @@ static uint32_t resolve_can_id( const en_can_kind kind, const size_t len, const 
     return id;
 }
 
-static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_std_can_id( const size_t n, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
     /* CAN_ID layout                                  */
@@ -166,7 +166,7 @@ static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff )
 
     uint32_t can_id = CAN_ID_INVALID;
 
-    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    if( ( E_CAN_BUFF_QTY == n ) && ( NULL != p_buff ) )
     {
         can_id  = ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_2 ] >> C_HDR2_OFFSET );
         can_id |= ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_1 ] << C_HDR1_OFFSET );
@@ -175,7 +175,7 @@ static uint32_t resolve_std_can_id( const size_t len, const uint8_t *p_buff )
     return can_id;
 }
 
-static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff )
+static uint32_t resolve_ext_can_id( const size_t n, const uint8_t *p_buff )
 {
     /* ---------------------------------------------- */
     /* CAN_ID layout                                  */
@@ -200,7 +200,7 @@ static uint32_t resolve_ext_can_id( const size_t len, const uint8_t *p_buff )
 
     uint32_t can_id = CAN_ID_INVALID;
 
-    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    if( ( E_CAN_BUFF_QTY == n ) && ( NULL != p_buff ) )
     {
         can_id  = (uint32_t)p_buff[ E_CAN_BUFF_HDR_4 ];
         can_id |= ( (uint32_t)p_buff[ E_CAN_BUFF_HDR_3 ] << C_HDR3_OFFSET );
