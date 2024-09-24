@@ -47,13 +47,13 @@ static void irq_cbk( const uint gpio, const uint32_t events );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-void rp2040_init_led_1_hw( void )
+void rp2040_init_led_1( void )
 {
     gpio_init( LED_1_PORT );
     gpio_set_dir( LED_1_PORT, GPIO_OUT );
 }
 
-void rp2040_init_spi_1_hw( void )
+void rp2040_init_spi_1( void )
 {
     /* Configute SPI baudrate*/
     (void)spi_init( SPI_1_HW, SPI_1_BAUDRATE );

@@ -39,8 +39,7 @@ typedef enum
 
 typedef enum
 {
-    E_CAN_DLC_NONE = 0U,
-    E_CAN_DLC_MIN = E_CAN_DLC_NONE,
+    E_CAN_DLC_MIN = 0U,
     E_CAN_DLC_MAX = E_CAN_DATA_QTY
 } en_can_dlc;
 
