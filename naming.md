@@ -27,7 +27,7 @@ reg                 register
 req                 request
 read                --
 write               --
-
+inval               INVALID
 
 Length
 配列長を引数で指定する場合、nとする。

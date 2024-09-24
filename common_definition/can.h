@@ -12,7 +12,7 @@
 /* -------------------------------------------------------------------------- */
 #define STD_CAN_ID_MAX       ( (uint32_t)0x000007FFU )
 #define EXT_CAN_ID_MAX       ( (uint32_t)0x1FFFFFFFU )
-#define CAN_ID_INVALID       ( (uint32_t)0xFFFFFFFFU )
+#define CAN_ID_INVAL       ( (uint32_t)0xFFFFFFFFU )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -21,7 +21,7 @@ typedef enum
 {
     E_CAN_KIND_STD,
     E_CAN_KIND_EXT,
-    E_CAN_KIND_INVALID
+    E_CAN_KIND_INVAL
 } en_can_kind;
 
 typedef enum

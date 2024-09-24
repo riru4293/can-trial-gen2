@@ -5,7 +5,7 @@
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
 /* SPI command */
-#define SPI_CMD_INVALID                 ( (uint8_t)0xFFU )
+#define SPI_CMD_INVAL                   ( (uint8_t)0xFFU )
 #define SPI_CMD_WRITE_REG               ( (uint8_t)0x02U )
 #define SPI_CMD_READ_REG                ( (uint8_t)0x03U )
 #define SPI_CMD_MODIFY_REG              ( (uint8_t)0x05U )

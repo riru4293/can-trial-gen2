@@ -4,10 +4,7 @@
 /* System */
 #include <string.h>
 
-/* My standard library */
 #include <app_errno.h>
-
-/* Driver */
 #include <private/rp2040.h>
 #include <private/mcp2515.h>
 #include <private/mcp2515_spi_cmd.h>

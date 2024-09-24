@@ -75,7 +75,7 @@ en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
 /* -------------------------------------------------------------------------- */
 static void read_rx_buff( const en_can_rx can_rx, const size_t n, uint8_t buff[n] )
 {
-    uint8_t cmd = SPI_CMD_INVALID;
+    uint8_t cmd = SPI_CMD_INVAL;
 
     /* Resolve the read command per RX */
     switch ( can_rx )
@@ -93,7 +93,7 @@ static void read_rx_buff( const en_can_rx can_rx, const size_t n, uint8_t buff[n
         break;
     }
 
-    if( ( cmd != SPI_CMD_INVALID ) && ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
+    if( ( cmd != SPI_CMD_INVAL ) && ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
         /* Begin SPI communication */
         mcp2515_begin_spi();
@@ -130,7 +130,7 @@ static en_can_kind resolve_can_kind( const size_t n, const uint8_t buff[n] )
         
         default:
             /* Unreachable */
-            kind = E_CAN_KIND_INVALID;
+            kind = E_CAN_KIND_INVAL;
             break;
         }
     }
@@ -153,7 +153,7 @@ static uint32_t resolve_can_id( const en_can_kind kind, const size_t n, const ui
         break;
     
     default:
-        id = CAN_ID_INVALID;
+        id = CAN_ID_INVAL;
         break;
     }
 
@@ -176,7 +176,7 @@ static uint32_t resolve_std_can_id( const size_t n, const uint8_t buff[n] )
     const uint8_t C_HDR1_OFFSET = 3U;
     const uint8_t C_HDR2_OFFSET = 5U;
 
-    uint32_t can_id = CAN_ID_INVALID;
+    uint32_t can_id = CAN_ID_INVAL;
 
     if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
@@ -207,7 +207,7 @@ static uint32_t resolve_ext_can_id( const size_t n, const uint8_t buff[n] )
     const uint8_t C_HDR2_SID_OFFSET = 13U;  /* Range of 0xE0 in HDR2(SIDL) */
     const uint8_t C_HDR3_OFFSET     =  8U;
 
-    uint32_t can_id = CAN_ID_INVALID;
+    uint32_t can_id = CAN_ID_INVAL;
 
     if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {

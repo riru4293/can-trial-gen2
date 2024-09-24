@@ -14,8 +14,9 @@
 /* -------------------------------------------------------------------------- */
 typedef enum
 {
-    E_OK,
-    E_NOK
+    E_OK    = 0x00U,                     /* No error         */      
+    E_INVAL = 0x16U,                     /* Invalid argument */
+    E_NOK   = 0xFFU
 } en_errno;
 
 #endif /* APP_ERRNO_H */

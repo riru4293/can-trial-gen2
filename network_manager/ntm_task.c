@@ -163,7 +163,7 @@ static void reset_controller( void )
 
 static void proc_recv_can( const en_can_rx can_rx )
 {
-    st_can_msg can_msg = { CAN_ID_INVALID, E_CAN_KIND_INVALID, E_CAN_DLC_MIN, { 0U } };
+    st_can_msg can_msg = { CAN_ID_INVAL, E_CAN_KIND_INVAL, E_CAN_DLC_MIN, { 0U } };
 
     switch ( can_rx )
     {
