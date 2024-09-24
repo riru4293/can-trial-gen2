@@ -19,6 +19,33 @@
 #define REG_ADDR_RXF2EID0               ( (uint8_t)0x0BU )
 #define REG_ADDR_BFPCTRL                ( (uint8_t)0x0CU )
 #define REG_ADDR_TXRTSCTRL              ( (uint8_t)0x0DU )
+/*!
+ * @brief CANSTAT
+ * CAN STATUS REGISTER (ADDRESS: XEh)
+ *
+ * | bit#7  | bit#6  | bit#5  | bit#4 | bit#3 | bit#2 | bit#1 | bit#0 |
+ * | ------ | ------ | ------ | ----- | ----- | ----- | ----- | ----- |
+ * | R-1    | R-0    | R-0    | U-0   | R-0   | R-0   | R-0   | U-0   |
+ * | OPMOD2 | OPMOD1 | OPMOD0 | -     | ICOD2 | ICOD1 | ICOD0 | -     |
+ *
+ * - bit 7-5: OPMOD[2:0]: Operation Mode bits
+ *     - 000 = Device is in Normal Operation mode
+ *     - 001 = Device is in Sleep mode
+ *     - 010 = Device is in Loopback mode
+ *     - 011 = Device is in Listen-Only mode
+ *     - 100 = Device is in Configuration mode
+ * - bit 4: Unimplemented: Read as '0'
+ * - bit 3-1: ICOD[2:0]: Interrupt Flag Code bits
+ *     - 000 = No interrupt
+ *     - 001 = Error interrupt
+ *     - 010 = Wake-up interrupt
+ *     - 011 = TXB0 interrupt
+ *     - 100 = TXB1 interrupt
+ *     - 101 = TXB2 interrupt
+ *     - 110 = RXB0 interrupt
+ *     - 111 = RXB1 interrupt
+ * - bit 0: Unimplemented: Read as '0'
+ */
 #define REG_ADDR_CANSTAT                ( (uint8_t)0x0EU )
 #define REG_ADDR_CANCTRL                ( (uint8_t)0x0FU )
 #define REG_ADDR_RXF3SIDH               ( (uint8_t)0x10U )

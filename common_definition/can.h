@@ -37,6 +37,10 @@ typedef enum
     E_CAN_DATA_QTY
 } en_can_data;
 
+/**
+ * @brief DLC definitions of CAN message.
+ * 
+ */
 typedef enum
 {
     E_CAN_DLC_MIN = 0U,
