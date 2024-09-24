@@ -148,7 +148,7 @@ void mcp2515_modify_reg( const uint8_t addr, const uint8_t mask, const uint8_t v
     mcp2515_begin_spi();
     
     /* Write to MCP2515 register with bit mask */
-    mcp2515_write_spi( SPI_CMD_MODBITS_REG );
+    mcp2515_write_spi( SPI_CMD_MODIFY_REG );
     mcp2515_write_spi( addr );
     mcp2515_write_spi( mask );
     mcp2515_write_spi( val );

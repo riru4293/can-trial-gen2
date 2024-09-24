@@ -17,10 +17,10 @@ void hwd_init( void )
     stdio_init_all();
 
     /* Initialize LED */
-    rp2040_init_led_1_hw();
+    rp2040_init_led_1();
 
     /* Initialize SPI */
-    rp2040_init_spi_1_hw();
+    rp2040_init_spi_1();
 }
 
 void hwd_turn_on_led_1( const bool is_on )

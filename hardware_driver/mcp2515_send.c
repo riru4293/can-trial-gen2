@@ -4,10 +4,7 @@
 /* System */
 #include <string.h>
 
-/* My standard library */
 #include <app_errno.h>
-
-/* Driver */
 #include <private/mcp2515.h>
 #include <private/mcp2515_spi_cmd.h>
 #include <private/mcp2515_reg.h>
@@ -23,8 +20,8 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void set_std_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff );
-static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff );
+static void set_std_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
+static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -105,7 +102,7 @@ en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_ms
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-static void set_std_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff )
+static void set_std_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] )
 {
     /* ---------------------------------------------- */
     /* CAN_ID layout                                  */
@@ -123,15 +120,15 @@ static void set_std_can_id( const uint32_t can_id, const size_t len, uint8_t *p_
     const uint8_t C_HDR1_OFFSET = 3U;
     const uint8_t C_HDR2_OFFSET = 5U;
 
-    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
-        p_buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
-        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+        buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
+        buff[ E_CAN_BUFF_DATA_2 ] |=
             (uint8_t)( (uint8_t)( can_id << C_HDR2_OFFSET ) & C_HDR2_SID_MASK );
     }
 }
 
-static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_buff )
+static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] )
 {
     /* ---------------------------------------------- */
     /* CAN_ID layout                                  */
@@ -154,14 +151,14 @@ static void set_ext_can_id( const uint32_t can_id, const size_t len, uint8_t *p_
     const uint8_t C_HDR2_SID_OFFSET = 13U;
     const uint8_t C_HDR3_OFFSET     =  8U;
 
-    if( ( E_CAN_BUFF_QTY == len ) && ( NULL != p_buff ) )
+    if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
-        p_buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
-        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+        buff[ E_CAN_BUFF_DATA_1 ]  = (uint8_t)( can_id >> C_HDR1_OFFSET );
+        buff[ E_CAN_BUFF_DATA_2 ] |=
             (uint8_t)( (uint8_t)( can_id >> C_HDR2_EID_OFFSET ) & C_HDR2_EID_MASK );
-        p_buff[ E_CAN_BUFF_DATA_2 ] |=
+        buff[ E_CAN_BUFF_DATA_2 ] |=
             (uint8_t)( (uint8_t)( can_id >> C_HDR2_SID_OFFSET ) & C_HDR2_SID_MASK );
-        p_buff[ E_CAN_BUFF_DATA_3 ]  = (uint8_t)( can_id >> C_HDR3_OFFSET );
-        p_buff[ E_CAN_BUFF_DATA_4 ]  = (uint8_t)can_id;
+        buff[ E_CAN_BUFF_DATA_3 ]  = (uint8_t)( can_id >> C_HDR3_OFFSET );
+        buff[ E_CAN_BUFF_DATA_4 ]  = (uint8_t)can_id;
     }
 }
