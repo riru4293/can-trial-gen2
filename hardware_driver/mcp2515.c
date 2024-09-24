@@ -64,17 +64,17 @@ void mcp2515_reset( void )
     mcp2515_write_reg( REG_ADDR_RXB1CTRL, 0x00 );
 }
 
-void mcp2515_start_can_comm( void )
+void mcp2515_start_comm( void )
 {
     set_opmod( OPMOD_NORMAL );
 }
 
-void mcp2515_set_can_irq_cbk( const fn_can_irq_cbk cbk )
+void mcp2515_set_irq_cbk( const fn_can_irq_cbk cbk )
 {
     g_can_irq_cbk = cbk;
 }
 
-void mcp2515_enable_can_irq_fact( const uint8_t fact )
+void mcp2515_enable_irq_fact( const uint8_t fact )
 {
     /* Enable IRQ factor */
     mcp2515_modify_reg( REG_ADDR_CANINTE, fact, REG_VAL_FF );
