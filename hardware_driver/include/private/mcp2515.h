@@ -33,6 +33,7 @@ typedef enum
 /* -------------------------------------------------------------------------- */
 void mcp2515_reset( void );
 void mcp2515_start_comm( void );
+void mcp2515_stop_comm( void );
 void mcp2515_set_irq_cbk( const fn_can_irq_cbk cbk );
 void mcp2515_enable_irq_fact( const uint8_t fact );
 
