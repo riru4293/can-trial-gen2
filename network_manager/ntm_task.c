@@ -25,12 +25,12 @@ typedef enum
     E_NTM_EVT_RESET     = 0x000001U,
     E_NTM_EVT_RECV_RX1  = 0x000002U,
     E_NTM_EVT_RECV_RX2  = 0x000004U,
-    E_NTM_EVT_RECV_TX1  = 0x000008U,
-    E_NTM_EVT_RECV_TX2  = 0x000010U,
-    E_NTM_EVT_RECV_TX3  = 0x000020U,
+    E_NTM_EVT_SENT_TX1  = 0x000008U,
+    E_NTM_EVT_SENT_TX2  = 0x000010U,
+    E_NTM_EVT_SENT_TX3  = 0x000020U,
     E_NTM_EVT_ALL       = (uint32_t)(
         E_NTM_EVT_RESET | E_NTM_EVT_RECV_RX1 | E_NTM_EVT_RECV_RX2
-        | E_NTM_EVT_RECV_TX1 | E_NTM_EVT_RECV_TX2 | E_NTM_EVT_RECV_TX3
+        | E_NTM_EVT_SENT_TX1 | E_NTM_EVT_SENT_TX2 | E_NTM_EVT_SENT_TX3
     )
 } en_ntm_event;
 
@@ -43,7 +43,7 @@ static void reset_controller( void );
 static void proc_recv_can( const en_can_rx can_rx );
 
 /* -------------------------------------------------------------------------- */
-/* Global                                                                  */
+/* Global                                                                     */
 /* -------------------------------------------------------------------------- */
 static TaskHandle_t g_tsk_hndl = NULL;
 static EventGroupHandle_t g_evt_hndl = NULL;
@@ -119,9 +119,9 @@ static void irq_handler( const uint8_t fact )
     {
         { E_CAN_IRQ_FACT_RX1, E_NTM_EVT_RECV_RX1 },
         { E_CAN_IRQ_FACT_RX2, E_NTM_EVT_RECV_RX2 },
-        { E_CAN_IRQ_FACT_TX1, E_NTM_EVT_RECV_TX1 },
-        { E_CAN_IRQ_FACT_TX2, E_NTM_EVT_RECV_TX2 },
-        { E_CAN_IRQ_FACT_TX3, E_NTM_EVT_RECV_TX3 }
+        { E_CAN_IRQ_FACT_TX1, E_NTM_EVT_SENT_TX1 },
+        { E_CAN_IRQ_FACT_TX2, E_NTM_EVT_SENT_TX2 },
+        { E_CAN_IRQ_FACT_TX3, E_NTM_EVT_SENT_TX3 }
     };
 
     uint8_t idx;
