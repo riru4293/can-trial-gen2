@@ -50,7 +50,7 @@ void hwd_start_can_comm( void )
 
 void hwd_stop_can_comm( void )
 {
-    hwd_reset_can_controller();
+    mcp2515_stop_comm();
 }
 
 en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )

@@ -3,6 +3,7 @@
 /* -------------------------------------------------------------------------- */
 /* System */
 #include <string.h>
+#include <pico/time.h>
 
 #include <app_errno.h>
 #include <private/rp2040.h>
@@ -20,6 +21,9 @@
 #define OPMOD_LOOPBACK                  ( (uint8_t)0x40U )
 #define OPMOD_LISTENONLY                ( (uint8_t)0x60U )
 #define OPMOD_CONFIG                    ( (uint8_t)0x80U )
+
+/* After reset wait(ms) */
+#define AFTER_RESET_WAIT                ( (uint8_t)100 )
 
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
@@ -43,6 +47,11 @@ void mcp2515_reset( void )
 {
     /* Execute reset CAN controller */
     reset_controller();
+
+    /* Wait after reset */
+    /* Just to be sure */
+    /* Be careful as the whole thing will freeze */
+    sleep_ms( AFTER_RESET_WAIT );
 
     /* Wait reset completion */
     wait_until_change_opmod( OPMOD_CONFIG );
@@ -68,6 +77,18 @@ void mcp2515_start_comm( void )
     if( OPMOD_CONFIG == opmod )
     {
         set_opmod( OPMOD_NORMAL );
+    }
+}
+
+void mcp2515_stop_comm( void )
+{
+    uint8_t opmod;
+
+    opmod = get_opmod();
+
+    if( OPMOD_NORMAL == opmod )
+    {
+        set_opmod( OPMOD_CONFIG );
     }
 }
 
