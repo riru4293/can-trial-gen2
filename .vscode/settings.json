@@ -40,7 +40,8 @@
     // 対策として、LinuxではこのパスにPythonへのシンボリックリンクを作成しておく。
     "raspberry-pi-pico.python3Path": "${HOME}/.pico-sdk/python/3.12.1/python.exe",
     "files.associations": {
-        "*.h": "c"
+        "*.h": "c",
+        "cstdlib": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

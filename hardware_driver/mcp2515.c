@@ -24,14 +24,12 @@
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void exec_cmd_reset( void );
-static void configure_can_baudrate( void );
+static void reset_controller( void );
+static void set_can_baudrate( void );
 static void wait_until_change_opmod( const uint8_t expect_opmod );
 static uint8_t get_opmod( void );
 static void set_opmod( const uint8_t opmod );
 static void wakeup( void );
-
-static void read_rx( const uint8_t spicmd, const size_t len, uint8_t *p_buff );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -43,37 +41,45 @@ static fn_can_irq_cbk g_can_irq_cbk = NULL;
 /* -------------------------------------------------------------------------- */
 void mcp2515_reset( void )
 {
-    /* Execute reset command */
-    exec_cmd_reset();
+    /* Execute reset CAN controller */
+    reset_controller();
 
     /* Wait reset completion */
     wait_until_change_opmod( OPMOD_CONFIG );
 
-    /* Configure CAN baudrate 125Kbps */
-    configure_can_baudrate();
+    /* Set CAN baudrate 125Kbps */
+    set_can_baudrate();
 
     /* 受信バッファ１設定。すべて受信。RX1への切り替え禁止。*/
-    //configure_rx_1_filter
+    /* Set RX1 filter */
     mcp2515_write_reg( REG_ADDR_RXB0CTRL, 0x60 );
 
     /* 受信バッファ２設定。フィルタ一致のみ受信。 */
-    //configure_rx_2_filter
+    /* Set RX2 filter */
     mcp2515_write_reg( REG_ADDR_RXB1CTRL, 0x00 );
 }
 
 void mcp2515_start_comm( void )
 {
-    set_opmod( OPMOD_NORMAL );
+    uint8_t opmod;
+
+    opmod = get_opmod();
+
+    if( OPMOD_CONFIG == opmod )
+    {
+        set_opmod( OPMOD_NORMAL );
+    }
 }
 
 void mcp2515_set_irq_cbk( const fn_can_irq_cbk cbk )
 {
+    /* Allow set NULL */
     g_can_irq_cbk = cbk;
 }
 
 void mcp2515_enable_irq_fact( const uint8_t fact )
 {
-    /* Enable IRQ factor */
+    /* Enable specified IRQ factor */
     mcp2515_modify_reg( REG_ADDR_CANINTE, fact, REG_VAL_FF );
 }
 
@@ -182,7 +188,7 @@ uint8_t mcp2515_read_reg( const uint8_t addr )
 {
     uint8_t val = 0U;
 
-    mcp2515_read_reg_array( addr, sizeof( uint8_t ), &val );
+    mcp2515_read_reg_array( addr, sizeof( val ), &val );
 
     return val;
 }
@@ -190,7 +196,7 @@ uint8_t mcp2515_read_reg( const uint8_t addr )
 /* -------------------------------------------------------------------------- */
 /* Private functions                                                          */
 /* -------------------------------------------------------------------------- */
-static void exec_cmd_reset( void )
+static void reset_controller( void )
 {
     /* Begin SPI communication */
     mcp2515_begin_spi();
@@ -202,16 +208,16 @@ static void exec_cmd_reset( void )
     mcp2515_end_spi();
 }
 
-static void configure_can_baudrate( void )
+static void set_can_baudrate( void )
 {
     const uint8_t baudrate[] = {
         /* +-------+-------+-------+-----------+-----+----+-----+-----+---------+------+------+ */
         /* |  CNF3 |  CNF2 |  CNF1 |  BAUDLATE | BRP | TQ | PS1 | PS2 | Smpl Pt | Sync | Prop | */
         /* +-------+-------+-------+-----------+-----+----+-----+-----+---------+------+------+ */
              0x02U , 0x89U , 0x07U /*  125KBPS |   7 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
-        /*   0x02U , 0x89U , 0x03U /*  250KBPS |   3 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
-        /*   0x02U , 0x89U , 0x01U /*  500KBPS |   1 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
-        /*   0x02U , 0x89U , 0x00U /* 1000KBPS |   0 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
+        /*   0x02U , 0x89U , 0x03U |   250KBPS |   3 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
+        /*   0x02U , 0x89U , 0x01U |   500KBPS |   1 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
+        /*   0x02U , 0x89U , 0x00U |  1000KBPS |   0 |  8 |   2 |   3 |  62.50% |   1  |    2 | */
         /* +-------+-------+-------+-----------+-----+----+-----+-----+---------+------+------+ */
     };
 
