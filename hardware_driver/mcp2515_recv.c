@@ -55,7 +55,7 @@ en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
         *p_dlc = ( buff[ E_CAN_BUFF_HDR_5 ] & REG_MASK_DLC_DLC );
         
         /* Get Data */
-        if( ( E_CAN_DLC_MIN < *p_dlc ) && ( E_CAN_DLC_MAX >= *p_dlc ) )
+        if( ( E_CAN_DLC_0 < *p_dlc ) && ( E_CAN_DLC_8 >= *p_dlc ) )
         {
             memcpy( p_can_msg->data, &buff[ E_CAN_BUFF_DATA_1 ], *p_dlc );
         }

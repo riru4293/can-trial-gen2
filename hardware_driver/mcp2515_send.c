@@ -80,13 +80,13 @@ en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_ms
         {
             dlc = p_can_msg->dlc;
 
-            if( E_CAN_DLC_MAX >= dlc )
+            if( E_CAN_DLC_8 >= dlc )
             {
                 /* Set DLC */
                 buff[ E_CAN_BUFF_DATA_1 ] |= ( dlc & REG_MASK_DLC_DLC );
 
                 /* Set Data */
-                if( E_CAN_DLC_MIN < dlc )
+                if( E_CAN_DLC_0 < dlc )
                 {
                     memcpy( &buff[ E_CAN_BUFF_DATA_1 ], &p_can_msg->data, dlc );
                 }

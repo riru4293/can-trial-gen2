@@ -10,9 +10,9 @@
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
-#define STD_CAN_ID_MAX       ( (uint32_t)0x000007FFU )
-#define EXT_CAN_ID_MAX       ( (uint32_t)0x1FFFFFFFU )
-#define CAN_ID_INVAL       ( (uint32_t)0xFFFFFFFFU )
+#define STD_CAN_ID_MAX                  ( (uint32_t)0x000007FFU )
+#define EXT_CAN_ID_MAX                  ( (uint32_t)0x1FFFFFFFU )
+#define CAN_ID_INVAL                    ( (uint32_t)0xFFFFFFFFU )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -51,9 +51,7 @@ typedef enum
     E_CAN_DLC_5 = 5U,
     E_CAN_DLC_6 = 6U,
     E_CAN_DLC_7 = 7U,
-    E_CAN_DLC_8 = 8U,
-    E_CAN_DLC_MIN = E_CAN_DLC_0,
-    E_CAN_DLC_MAX = E_CAN_DLC_8
+    E_CAN_DLC_8 = 8U
 } en_can_dlc;
 
 typedef struct

@@ -28,8 +28,8 @@
 #define NO_PERIODIC                     ( (uint8_t)0U )
 #define NO_REMAINING                    ( (uint8_t)0U )
 
-#define E_CAN_NNN_INIT                  ( ( uint8_t[ E_CAN_DLC_MAX ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
-#define E_CAN_YYY_INIT                  ( ( uint8_t[ E_CAN_DLC_MAX ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
+#define E_CAN_NNN_INIT                  ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
+#define E_CAN_YYY_INIT                  ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -197,7 +197,7 @@ static void reset_controller( void )
 
 static void proc_recv_can( const en_can_rx can_rx )
 {
-    st_can_msg can_msg = { CAN_ID_INVAL, E_CAN_KIND_INVAL, E_CAN_DLC_MIN, { 0U } };
+    st_can_msg can_msg = { CAN_ID_INVAL, E_CAN_KIND_INVAL, E_CAN_DLC_0, { 0U } };
 
     switch ( can_rx )
     {
