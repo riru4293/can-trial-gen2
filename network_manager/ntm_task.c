@@ -8,14 +8,28 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <event_groups.h>
+#include <timers.h>
+#include <queue.h>
 
 #include <app_errno.h>
 #include <hwd_api.h>
 #include <task_cfg.h>
+#include <can.h>
+#include <private/can_id.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
+#define DELIVERY_PERIOD_MS              ( (uint8_t)10U )
+#define DELIVERY_PERIOD                 ( pdMS_TO_TICKS( DELIVERY_PERIOD_MS ) )
+#define SEND_QUEUE_WAIT_MS              ( (uint8_t)0U )
+#define SEND_QUEUE_ELEM_MAX             ( (uint8_t)10U )
+#define SEND_QUEUE_ELEM_SIZE            ( sizeof( EXT_CAN_ID_MAX ) )
+#define NO_PERIODIC                     ( (uint8_t)0U )
+#define NO_REMAINING                    ( (uint8_t)0U )
+
+#define E_CAN_NNN_INIT                  ( ( uint8_t[ E_CAN_DLC_MAX ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
+#define E_CAN_YYY_INIT                  ( ( uint8_t[ E_CAN_DLC_MAX ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -41,28 +55,46 @@ static void task( void *nouse );
 static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
 static void proc_recv_can( const en_can_rx can_rx );
+static void delivery_cbk( const TimerHandle_t hndl );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
 static TaskHandle_t g_tsk_hndl = NULL;
 static EventGroupHandle_t g_evt_hndl = NULL;
+static TimerHandle_t g_delivery_timer_hndl = NULL;
+static volatile QueueHandle_t g_send_queue_hndl = NULL;
+
+/* Send CAN messagees */
+static st_can_msg g_msg_nnn = { E_CAN_ID_NNN, E_CAN_KIND_STD, E_CAN_DLC_4, E_CAN_NNN_INIT };
+static st_can_msg g_msg_yyy = { E_CAN_ID_YYY, E_CAN_KIND_STD, E_CAN_DLC_8, E_CAN_YYY_INIT };
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
 en_errno ntm_create_task( void )
 {
-    BaseType_t ret = pdFAIL;
+    BaseType_t result = pdFAIL;
 
     g_evt_hndl = xEventGroupCreate();
 
     if( NULL != g_evt_hndl )
     {
-        ret = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_TASK_PRIO_CAN, &g_tsk_hndl );
+        g_delivery_timer_hndl = xTimerCreate("CAN_DELIVERY", DELIVERY_PERIOD,
+            pdTRUE , NULL, delivery_cbk);
     }
 
-    return ( pdPASS == ret ) ? E_OK : E_NOK;
+    if( NULL != g_delivery_timer_hndl )
+    {
+        g_send_queue_hndl = xQueueCreate( SEND_QUEUE_ELEM_MAX, SEND_QUEUE_ELEM_SIZE );;
+    }
+
+    if( NULL != g_send_queue_hndl )
+    {
+        result = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_TASK_PRIO_CAN, &g_tsk_hndl );
+    }
+
+    return ( pdPASS == result ) ? E_OK : E_NOK;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -73,6 +105,8 @@ static void task( void *nouse )
     EventBits_t events;
 
     reset_controller();
+
+    (void)xTimerStart( g_delivery_timer_hndl, DELIVERY_PERIOD ); 
 
     while( true )
     {
@@ -188,5 +222,60 @@ static void proc_recv_can( const en_can_rx can_rx )
     default:
         /* Do nothing */
         break;
+    }
+}
+
+static void delivery_cbk( const TimerHandle_t hndl )
+{
+    const TickType_t C_QUEUE_WAIT = pdMS_TO_TICKS( SEND_QUEUE_WAIT_MS );
+
+    typedef enum
+    {
+        E_PERIOD_NNN = ( 1000U / DELIVERY_PERIOD_MS ),
+        E_PERIOD_YYY = (   10U / DELIVERY_PERIOD_MS )
+    } en_period;
+
+    typedef struct
+    {
+        const en_can_id id;
+        const en_period period;
+        uint16_t remaining;
+        st_can_msg *p_msg;
+    } st_count;
+
+    st_count count_tbl[] =
+    {
+        { .id = E_CAN_ID_NNN, .period = E_PERIOD_NNN, .remaining = E_PERIOD_NNN, .p_msg = &g_msg_nnn },
+        { .id = E_CAN_ID_YYY, .period = E_PERIOD_YYY, .remaining = E_PERIOD_YYY, .p_msg = &g_msg_yyy }
+    };
+
+    uint8_t idx;
+    st_count *p_cnt;
+    BaseType_t result;
+
+    for( idx = 0U; idx < sizeof( count_tbl ); idx++ )
+    {
+        p_cnt = &count_tbl[ idx ];
+
+        if( NO_PERIODIC != p_cnt->period )
+        {
+            if( NO_REMAINING != p_cnt->remaining )
+            {
+                p_cnt->remaining--;
+            }
+            else
+            {
+                result = xQueueSendToBack( g_send_queue_hndl, &p_cnt->id, C_QUEUE_WAIT );
+
+                if( pdPASS == result )
+                {
+                    p_cnt->remaining = p_cnt->period;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
     }
 }

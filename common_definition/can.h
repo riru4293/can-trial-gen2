@@ -43,8 +43,17 @@ typedef enum
  */
 typedef enum
 {
-    E_CAN_DLC_MIN = 0U,
-    E_CAN_DLC_MAX = E_CAN_DATA_QTY
+    E_CAN_DLC_0 = 0U,
+    E_CAN_DLC_1 = 1U,
+    E_CAN_DLC_2 = 2U,
+    E_CAN_DLC_3 = 3U,
+    E_CAN_DLC_4 = 4U,
+    E_CAN_DLC_5 = 5U,
+    E_CAN_DLC_6 = 6U,
+    E_CAN_DLC_7 = 7U,
+    E_CAN_DLC_8 = 8U,
+    E_CAN_DLC_MIN = E_CAN_DLC_0,
+    E_CAN_DLC_MAX = E_CAN_DLC_8
 } en_can_dlc;
 
 typedef struct
