@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 add_library(network_manager STATIC
     ${CMAKE_CURRENT_LIST_DIR}/ntm_task.c
+    ${CMAKE_CURRENT_LIST_DIR}/ntm_can_msg.c
 )
 
 # Add the library

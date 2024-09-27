@@ -30,7 +30,7 @@ static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_msg )
+en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg* p_can_msg )
 {
     en_errno result = E_NOK;
     uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };

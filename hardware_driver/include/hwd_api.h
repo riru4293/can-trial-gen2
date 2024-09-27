@@ -56,7 +56,7 @@ void hwd_enable_irq_handling( const bool enabled );
 void hwd_start_can_comm( void );
 void hwd_stop_can_comm( void );
 
-en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg );
-en_errno hwd_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_msg );
+en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg* p_can_msg );
+en_errno hwd_set_can_msg( const en_can_tx can_tx, const st_can_msg* p_can_msg );
 
 #endif /* HWD_API_H */

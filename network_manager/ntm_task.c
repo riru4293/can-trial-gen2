@@ -15,21 +15,14 @@
 #include <hwd_api.h>
 #include <task_cfg.h>
 #include <can.h>
-#include <private/can_id.h>
+#include <private/ntm_can_msg.h>
 
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
-#define DELIVERY_PERIOD_MS              ( (uint8_t)10U )
-#define DELIVERY_PERIOD                 ( pdMS_TO_TICKS( DELIVERY_PERIOD_MS ) )
-#define SEND_QUEUE_WAIT_MS              ( (uint8_t)0U )
-#define SEND_QUEUE_ELEM_MAX             ( (uint8_t)10U )
-#define SEND_QUEUE_ELEM_SIZE            ( sizeof( EXT_CAN_ID_MAX ) )
-#define NO_PERIODIC                     ( (uint8_t)0U )
-#define NO_REMAINING                    ( (uint8_t)0U )
-
-#define E_CAN_NNN_INIT                  ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
-#define E_CAN_YYY_INIT                  ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
+#define CAN_246_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
+#define CAN_428_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
+#define QUE_WAIT_TICK                   ( (TickType_t)0U )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -51,7 +44,7 @@ typedef enum
 /* -------------------------------------------------------------------------- */
 /* Prototype                                                                  */
 /* -------------------------------------------------------------------------- */
-static void task( void *nouse );
+static void task( void* nouse );
 static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
 static void proc_recv_can( const en_can_rx can_rx );
@@ -63,33 +56,39 @@ static void delivery_cbk( const TimerHandle_t hndl );
 static TaskHandle_t g_tsk_hndl = NULL;
 static EventGroupHandle_t g_evt_hndl = NULL;
 static TimerHandle_t g_delivery_timer_hndl = NULL;
-static volatile QueueHandle_t g_send_queue_hndl = NULL;
-
-/* Send CAN messagees */
-static st_can_msg g_msg_nnn = { E_CAN_ID_NNN, E_CAN_KIND_STD, E_CAN_DLC_4, E_CAN_NNN_INIT };
-static st_can_msg g_msg_yyy = { E_CAN_ID_YYY, E_CAN_KIND_STD, E_CAN_DLC_8, E_CAN_YYY_INIT };
+static volatile QueueHandle_t g_send_que_hndl = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
 en_errno ntm_create_task( void )
 {
+    const UBaseType_t C_QUE_ITEM_QTY = 10U;
+    const UBaseType_t C_QUE_ITEM_SIZE = sizeof( st_can_msg* );
+    const TickType_t C_DELIVERY_PERIOD_TICK = pdMS_TO_TICKS( 10U );
+
     BaseType_t result = pdFAIL;
 
     g_evt_hndl = xEventGroupCreate();
 
+    result = ( NULL != g_evt_hndl ) ? pdPASS : pdFAIL;
+
     if( NULL != g_evt_hndl )
     {
-        g_delivery_timer_hndl = xTimerCreate("CAN_DELIVERY", DELIVERY_PERIOD,
-            pdTRUE , NULL, delivery_cbk);
+        g_delivery_timer_hndl = xTimerCreate(
+            "CAN_DELIVERY", C_DELIVERY_PERIOD_TICK, pdTRUE , NULL, delivery_cbk);
+
+        result = ( NULL != g_delivery_timer_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( NULL != g_delivery_timer_hndl )
+    if( pdPASS != result )
     {
-        g_send_queue_hndl = xQueueCreate( SEND_QUEUE_ELEM_MAX, SEND_QUEUE_ELEM_SIZE );;
+        g_send_que_hndl = xQueueCreate( C_QUE_ITEM_QTY, C_QUE_ITEM_SIZE );
+
+        result = ( NULL != g_send_que_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( NULL != g_send_queue_hndl )
+    if( pdPASS != result )
     {
         result = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_TASK_PRIO_CAN, &g_tsk_hndl );
     }
@@ -100,13 +99,17 @@ en_errno ntm_create_task( void )
 /* -------------------------------------------------------------------------- */
 /* Private function                                                           */
 /* -------------------------------------------------------------------------- */
-static void task( void *nouse )
+static void task( void* nouse )
 {
+    const TickType_t C_DELIVERY_DELAY_TICK = 0U;
+
     EventBits_t events;
+    st_can_msg* msg;
+    BaseType_t result;
 
     reset_controller();
 
-    (void)xTimerStart( g_delivery_timer_hndl, DELIVERY_PERIOD ); 
+    (void)xTimerStart( g_delivery_timer_hndl, C_DELIVERY_DELAY_TICK ); 
 
     while( true )
     {
@@ -136,6 +139,13 @@ static void task( void *nouse )
                 /* Enable CAN IRQ factor of the RX2 */
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX2 );
             }
+
+            result = xQueueReceive( g_send_que_hndl, &msg, QUE_WAIT_TICK );
+
+            if( pdPASS == result )
+            {
+                hwd_set_can_msg( E_CAN_TX_1, msg );
+            }
         }
     }
 
@@ -149,7 +159,7 @@ static void irq_handler( const uint8_t fact )
         en_ntm_event evt;
     } st_fact_to_evt;
 
-    const st_fact_to_evt T_CONV[] =
+    const st_fact_to_evt C_TBL[] =
     {
         { E_CAN_IRQ_FACT_RX1, E_NTM_EVT_RECV_RX1 },
         { E_CAN_IRQ_FACT_RX2, E_NTM_EVT_RECV_RX2 },
@@ -157,16 +167,19 @@ static void irq_handler( const uint8_t fact )
         { E_CAN_IRQ_FACT_TX2, E_NTM_EVT_SENT_TX2 },
         { E_CAN_IRQ_FACT_TX3, E_NTM_EVT_SENT_TX3 }
     };
+    
+    const uint8_t C_QTY = sizeof( C_TBL ) / sizeof( st_fact_to_evt );
 
     uint8_t idx;
+    uint8_t irq;
     BaseType_t hptw = pdFALSE;
 
-    for( idx = 0U; idx < sizeof( T_CONV ); idx++ )
+    for( idx = 0U; idx < C_QTY; idx++ )
     {
-        if( T_CONV[ idx ].fact == (uint8_t)T_CONV[ idx ].fact & fact )
+        if( C_TBL[ idx ].fact == ( C_TBL[ idx ].fact & fact ) )
         {
             /* Cause an event per factor */
-            xEventGroupSetBitsFromISR( g_evt_hndl, T_CONV[ idx ].evt, &hptw );
+            xEventGroupSetBitsFromISR( g_evt_hndl, C_TBL[ idx ].evt, &hptw );
         }
     }
 
@@ -227,49 +240,51 @@ static void proc_recv_can( const en_can_rx can_rx )
 
 static void delivery_cbk( const TimerHandle_t hndl )
 {
-    const TickType_t C_QUEUE_WAIT = pdMS_TO_TICKS( SEND_QUEUE_WAIT_MS );
-
-    typedef enum
-    {
-        E_PERIOD_NNN = ( 1000U / DELIVERY_PERIOD_MS ),
-        E_PERIOD_YYY = (   10U / DELIVERY_PERIOD_MS )
-    } en_period;
+    const uint16_t C_NO_REMAINING = 0U;
 
     typedef struct
     {
-        const en_can_id id;
-        const en_period period;
+        bool is_comp;
+        en_can_period period;
         uint16_t remaining;
-        st_can_msg *p_msg;
+        st_can_msg* p_msg;
     } st_count;
 
     st_count count_tbl[] =
     {
-        { .id = E_CAN_ID_NNN, .period = E_PERIOD_NNN, .remaining = E_PERIOD_NNN, .p_msg = &g_msg_nnn },
-        { .id = E_CAN_ID_YYY, .period = E_PERIOD_YYY, .remaining = E_PERIOD_YYY, .p_msg = &g_msg_yyy }
+        { .is_comp = false, .period = E_CAN_246_PERIOD, .remaining = E_CAN_246_PERIOD, .p_msg = &g_can_246 },
+        { .is_comp = false, .period = E_CAN_428_PERIOD, .remaining = E_CAN_428_PERIOD, .p_msg = &g_can_428 }
     };
 
     uint8_t idx;
-    st_count *p_cnt;
+    st_count* p_cnt;
     BaseType_t result;
 
     for( idx = 0U; idx < sizeof( count_tbl ); idx++ )
     {
         p_cnt = &count_tbl[ idx ];
 
-        if( NO_PERIODIC != p_cnt->period )
+        if( E_NO_PERIOD != p_cnt->period )
         {
-            if( NO_REMAINING != p_cnt->remaining )
+            /* Countdown the remaining */
+            if( C_NO_REMAINING != p_cnt->remaining )
             {
                 p_cnt->remaining--;
             }
             else
             {
-                result = xQueueSendToBack( g_send_queue_hndl, &p_cnt->id, C_QUEUE_WAIT );
+                p_cnt->is_comp = true;
+                p_cnt->remaining = p_cnt->period;
+            }
+
+            /* Queue messages whose sending period has expired */
+            if( true == p_cnt->is_comp )
+            {
+                result = xQueueSendToBack( g_send_que_hndl, &p_cnt->p_msg, QUE_WAIT_TICK );
 
                 if( pdPASS == result )
                 {
-                    p_cnt->remaining = p_cnt->period;
+                    p_cnt->is_comp = false;
                 }
                 else
                 {

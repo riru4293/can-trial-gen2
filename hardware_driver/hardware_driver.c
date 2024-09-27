@@ -53,12 +53,12 @@ void hwd_stop_can_comm( void )
     mcp2515_stop_comm();
 }
 
-en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
+en_errno hwd_get_can_msg( const en_can_rx can_rx, st_can_msg* p_can_msg )
 {
     return mcp2515_get_can_msg( can_rx, p_can_msg );
 }
 
-en_errno hwd_set_can_msg( const en_can_tx can_tx, const st_can_msg *p_can_msg )
+en_errno hwd_set_can_msg( const en_can_tx can_tx, const st_can_msg* p_can_msg )
 {
     return mcp2515_set_can_msg( can_tx, p_can_msg );
 }

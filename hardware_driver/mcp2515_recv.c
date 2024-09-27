@@ -33,11 +33,11 @@ static uint32_t resolve_ext_can_id( const size_t n, const uint8_t buff[n] );
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
 /* -------------------------------------------------------------------------- */
-en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg *p_can_msg )
+en_errno mcp2515_get_can_msg( const en_can_rx can_rx, st_can_msg* p_can_msg )
 {
     en_errno result = E_NOK;
     uint8_t buff[ E_CAN_BUFF_QTY ] = { 0U };
-    uint8_t *p_dlc;
+    uint8_t* p_dlc;
 
     if( NULL != p_can_msg )
     {
