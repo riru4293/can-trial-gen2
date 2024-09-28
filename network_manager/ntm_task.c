@@ -135,6 +135,10 @@ static void task( void* nouse )
 
     reset_controller();
 
+    (void)xSemaphoreGive( g_tx1_semphr_hndl );
+    (void)xSemaphoreGive( g_tx2_semphr_hndl );
+    (void)xSemaphoreGive( g_tx3_semphr_hndl );
+
     (void)xTimerStart( g_delivery_timer_hndl, C_DELIVERY_DELAY_TICK ); 
 
     while( true )
@@ -312,7 +316,7 @@ static void delivery_cbk( const TimerHandle_t hndl )
         st_can_msg* p_msg;
     } st_count;
 
-    st_count count_tbl[] =
+    static st_count count_tbl[] =
     {
         { .is_comp = false, .period = E_CAN_246_PERIOD, .remaining = E_CAN_246_PERIOD, .p_msg = &g_can_246 },
         { .is_comp = false, .period = E_CAN_428_PERIOD, .remaining = E_CAN_428_PERIOD, .p_msg = &g_can_428 }
@@ -322,7 +326,7 @@ static void delivery_cbk( const TimerHandle_t hndl )
     st_count* p_cnt;
     BaseType_t result;
 
-    for( idx = 0U; idx < sizeof( count_tbl ); idx++ )
+    for( idx = 0U; idx < ( sizeof( count_tbl ) / sizeof( st_count ) ); idx++ )
     {
         p_cnt = &count_tbl[ idx ];
 
