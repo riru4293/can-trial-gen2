@@ -76,7 +76,7 @@ en_errno ntm_create_task( void )
 
     result = ( NULL != g_evt_hndl ) ? pdPASS : pdFAIL;
 
-    if( NULL != g_evt_hndl )
+    if( pdPASS == result )
     {
         g_delivery_timer_hndl = xTimerCreate(
             "CAN_DELIVERY", C_DELIVERY_PERIOD_TICK, pdTRUE , NULL, delivery_cbk);
@@ -84,28 +84,35 @@ en_errno ntm_create_task( void )
         result = ( NULL != g_delivery_timer_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( pdPASS != result )
+    if( pdPASS == result )
+    {
+        g_send_que_hndl = xQueueCreate( C_QUE_ITEM_QTY, C_QUE_ITEM_SIZE );
+
+        result = ( NULL != g_send_que_hndl ) ? pdPASS : pdFAIL;
+    }
+
+    if( pdPASS == result )
     {
         g_tx1_semphr_hndl = xSemaphoreCreateBinary();
 
         result = ( NULL != g_tx1_semphr_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( pdPASS != result )
+    if( pdPASS == result )
     {
         g_tx2_semphr_hndl = xSemaphoreCreateBinary();
 
         result = ( NULL != g_tx2_semphr_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( pdPASS != result )
+    if( pdPASS == result )
     {
         g_tx3_semphr_hndl = xSemaphoreCreateBinary();
 
         result = ( NULL != g_tx3_semphr_hndl ) ? pdPASS : pdFAIL;
     }
 
-    if( pdPASS != result )
+    if( pdPASS == result )
     {
         result = xTaskCreate( task, "CAN_MANAGER", 1024, NULL, E_TASK_PRIO_CAN, &g_tsk_hndl );
     }
@@ -121,7 +128,7 @@ static void task( void* nouse )
     const TickType_t C_DELIVERY_DELAY_TICK = 0U;
 
     EventBits_t events;
-    st_can_msg* msg;
+    st_can_msg* msg = &g_can_246;   /* 初期化 */
     BaseType_t result;
 
     ntm_init_can_msg_buff();
