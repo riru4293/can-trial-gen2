@@ -20,8 +20,6 @@
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
-#define CAN_246_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
-#define CAN_428_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
 #define QUE_WAIT_TICK                   ( (TickType_t)0U )
 
 /* -------------------------------------------------------------------------- */
@@ -106,6 +104,8 @@ static void task( void* nouse )
     EventBits_t events;
     st_can_msg* msg;
     BaseType_t result;
+
+    ntm_init_can_msg_buff();
 
     reset_controller();
 

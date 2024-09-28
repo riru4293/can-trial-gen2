@@ -1,6 +1,9 @@
 /* -------------------------------------------------------------------------- */
 /* Include                                                                    */
 /* -------------------------------------------------------------------------- */
+/* System */
+#include <string.h>
+
 #include <can.h>
 #include <private/ntm_can_id.h>
 #include <private/ntm_can_msg.h>
@@ -8,6 +11,8 @@
 /* -------------------------------------------------------------------------- */
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
+#define CAN_246_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x05U, 0xA0U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U } )
+#define CAN_428_INIT_DATA               ( ( uint8_t[ E_CAN_DLC_8 ] ){ 0xFFU, 0x1FU, 0x1FU, 0x77U, 0x44U, 0x33U, 0x22U, 0x55U } )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -20,5 +25,14 @@
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
-st_can_msg g_can_246 = { .id = E_CAN_246_ID, .kind = E_CAN_KIND_STD, .dlc  = 0U, .data = { 0U } };
-st_can_msg g_can_428 = { .id = E_CAN_428_ID, .kind = E_CAN_KIND_STD, .dlc  = 0U, .data = { 0U } };
+st_can_msg g_can_246 = { .id = E_CAN_246_ID, .kind = E_CAN_KIND_STD, .dlc  = E_CAN_DLC_8, .data = { 0U } };
+st_can_msg g_can_428 = { .id = E_CAN_428_ID, .kind = E_CAN_KIND_STD, .dlc  = E_CAN_DLC_8, .data = { 0U } };
+
+/* -------------------------------------------------------------------------- */
+/* Public function                                                            */
+/* -------------------------------------------------------------------------- */
+void ntm_init_can_msg_buff( void )
+{
+    memcpy( g_can_246.data, CAN_246_INIT_DATA, E_CAN_DATA_QTY );
+    memcpy( g_can_428.data, CAN_428_INIT_DATA, E_CAN_DATA_QTY );
+}
