@@ -216,9 +216,9 @@ void send_can_msg( void )
 
     st_can_msg* p_msg = &g_can_inval;
 
-    for( uint8_t i = 0U; i < E_CAN_TX_QTY; i++ )
+    if( pdPASS == xQueueReceive( g_send_que_hndl, &p_msg, QUE_WAIT_TICK ) )
     {
-        if( pdPASS == xQueueReceive( g_send_que_hndl, &p_msg, QUE_WAIT_TICK ) )
+        for( uint8_t i = 0U; i < E_CAN_TX_QTY; i++ )
         {
             if ( pdTRUE == xSemaphoreTake( T_TX_CFG[ i ].semphr, SEMPHR_WAIT_TICK ) )
             {
@@ -238,7 +238,7 @@ static void irq_handler( const uint8_t fact )
         en_ntm_event evt;
     } st_fact_to_evt;
 
-    const st_fact_to_evt C_TBL[] =
+    const st_fact_to_evt T_CONV[] =
     {
         { E_CAN_IRQ_FACT_RX1, E_NTM_EVT_RECV_RX1 },
         { E_CAN_IRQ_FACT_RX2, E_NTM_EVT_RECV_RX2 },
@@ -247,7 +247,7 @@ static void irq_handler( const uint8_t fact )
         { E_CAN_IRQ_FACT_TX3, E_NTM_EVT_SENT_TX3 }
     };
     
-    const uint8_t C_QTY = sizeof( C_TBL ) / sizeof( st_fact_to_evt );
+    const uint8_t C_QTY = sizeof( T_CONV ) / sizeof( st_fact_to_evt );
 
     uint8_t idx;
     uint8_t irq;
@@ -255,10 +255,10 @@ static void irq_handler( const uint8_t fact )
 
     for( idx = 0U; idx < C_QTY; idx++ )
     {
-        if( C_TBL[ idx ].fact == ( C_TBL[ idx ].fact & fact ) )
+        if( T_CONV[ idx ].fact == ( T_CONV[ idx ].fact & fact ) )
         {
             /* Cause an event per factor */
-            xEventGroupSetBitsFromISR( g_evt_hndl, C_TBL[ idx ].evt, &hptw );
+            xEventGroupSetBitsFromISR( g_evt_hndl, T_CONV[ idx ].evt, &hptw );
         }
     }
 
