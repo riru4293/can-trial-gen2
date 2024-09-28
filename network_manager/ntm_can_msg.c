@@ -25,6 +25,8 @@
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
+st_can_msg g_can_inval = { .id = CAN_ID_INVAL, .kind = E_CAN_KIND_INVAL, .dlc  = E_CAN_DLC_0, .data = { 0U } };
+
 st_can_msg g_can_246 = { .id = E_CAN_246_ID, .kind = E_CAN_KIND_STD, .dlc  = E_CAN_DLC_8, .data = { 0U } };
 st_can_msg g_can_428 = { .id = E_CAN_428_ID, .kind = E_CAN_KIND_STD, .dlc  = E_CAN_DLC_8, .data = { 0U } };
 

@@ -28,6 +28,8 @@ void ntm_init_can_msg_buff( void );
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
+extern st_can_msg g_can_inval;
+
 extern st_can_msg g_can_246;
 extern st_can_msg g_can_428;
 

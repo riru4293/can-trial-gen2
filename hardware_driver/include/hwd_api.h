@@ -24,7 +24,8 @@ typedef enum
 {
     E_CAN_TX_1,
     E_CAN_TX_2,
-    E_CAN_TX_3
+    E_CAN_TX_3,
+    E_CAN_TX_QTY
 } en_can_tx;
 
 typedef enum

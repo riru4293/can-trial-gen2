@@ -49,6 +49,7 @@ static void irq_handler( const uint8_t fact );
 static void reset_controller( void );
 static void proc_recv_can( const en_can_rx can_rx );
 static void delivery_cbk( const TimerHandle_t hndl );
+void send_can_msg( void );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -128,7 +129,6 @@ static void task( void* nouse )
     const TickType_t C_DELIVERY_DELAY_TICK = 0U;
 
     EventBits_t events;
-    st_can_msg* msg = &g_can_246;   /* 初期化 */
     BaseType_t result;
 
     ntm_init_can_msg_buff();
@@ -194,24 +194,37 @@ static void task( void* nouse )
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_TX3 );
             }
 
-            result = xQueueReceive( g_send_que_hndl, &msg, QUE_WAIT_TICK );
+            send_can_msg();
+        }
+    }
+}
 
-            if( pdPASS == result )
+void send_can_msg( void )
+{
+    typedef struct
+    {
+        en_can_tx idx;
+        SemaphoreHandle_t semphr;
+    } tx_cfg;
+
+    const tx_cfg T_TX_CFG[] =
+    {
+        { E_CAN_TX_1, g_tx1_semphr_hndl },
+        { E_CAN_TX_2, g_tx2_semphr_hndl },
+        { E_CAN_TX_3, g_tx3_semphr_hndl }
+    };
+
+    st_can_msg* p_msg = &g_can_inval;
+
+    for( uint8_t i = 0U; i < E_CAN_TX_QTY; i++ )
+    {
+        if( pdPASS == xQueueReceive( g_send_que_hndl, &p_msg, QUE_WAIT_TICK ) )
+        {
+            if ( pdTRUE == xSemaphoreTake( T_TX_CFG[ i ].semphr, SEMPHR_WAIT_TICK ) )
             {
-                if ( pdTRUE == xSemaphoreTake( g_tx1_semphr_hndl, SEMPHR_WAIT_TICK ) )
-                {
-                    hwd_set_can_msg( E_CAN_TX_1, msg );
-                }
+                hwd_set_can_msg( T_TX_CFG[ i ].idx, p_msg );
 
-                if ( pdTRUE == xSemaphoreTake( g_tx2_semphr_hndl, SEMPHR_WAIT_TICK ) )
-                {
-                    hwd_set_can_msg( E_CAN_TX_2, msg );
-                }
-
-                if ( pdTRUE == xSemaphoreTake( g_tx3_semphr_hndl, SEMPHR_WAIT_TICK ) )
-                {
-                    hwd_set_can_msg( E_CAN_TX_3, msg );
-                }
+                break;
             }
         }
     }
