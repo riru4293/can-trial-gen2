@@ -10,6 +10,7 @@
 #include <event_groups.h>
 #include <timers.h>
 #include <queue.h>
+#include <semphr.h>
 
 #include <app_errno.h>
 #include <hwd_api.h>
@@ -21,6 +22,7 @@
 /* Macro                                                                      */
 /* -------------------------------------------------------------------------- */
 #define QUE_WAIT_TICK                   ( (TickType_t)0U )
+#define SEMPHR_WAIT_TICK                ( (TickType_t)0U )
 
 /* -------------------------------------------------------------------------- */
 /* Type definition                                                            */
@@ -55,6 +57,9 @@ static TaskHandle_t g_tsk_hndl = NULL;
 static EventGroupHandle_t g_evt_hndl = NULL;
 static TimerHandle_t g_delivery_timer_hndl = NULL;
 static volatile QueueHandle_t g_send_que_hndl = NULL;
+static volatile SemaphoreHandle_t g_tx1_semphr_hndl = NULL;
+static volatile SemaphoreHandle_t g_tx2_semphr_hndl = NULL;
+static volatile SemaphoreHandle_t g_tx3_semphr_hndl = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* Public function                                                            */
@@ -81,9 +86,23 @@ en_errno ntm_create_task( void )
 
     if( pdPASS != result )
     {
-        g_send_que_hndl = xQueueCreate( C_QUE_ITEM_QTY, C_QUE_ITEM_SIZE );
+        g_tx1_semphr_hndl = xSemaphoreCreateBinary();
 
-        result = ( NULL != g_send_que_hndl ) ? pdPASS : pdFAIL;
+        result = ( NULL != g_tx1_semphr_hndl ) ? pdPASS : pdFAIL;
+    }
+
+    if( pdPASS != result )
+    {
+        g_tx2_semphr_hndl = xSemaphoreCreateBinary();
+
+        result = ( NULL != g_tx2_semphr_hndl ) ? pdPASS : pdFAIL;
+    }
+
+    if( pdPASS != result )
+    {
+        g_tx3_semphr_hndl = xSemaphoreCreateBinary();
+
+        result = ( NULL != g_tx3_semphr_hndl ) ? pdPASS : pdFAIL;
     }
 
     if( pdPASS != result )
@@ -140,15 +159,51 @@ static void task( void* nouse )
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_RX2 );
             }
 
+            if( (EventBits_t)E_NTM_EVT_SENT_TX1 == ( (EventBits_t)E_NTM_EVT_SENT_TX1 & events ) )
+            {
+                (void)xSemaphoreGive( g_tx1_semphr_hndl );
+
+                /* Enable CAN IRQ factor of the TX1 */
+                hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_TX1 );
+            }
+
+            if( (EventBits_t)E_NTM_EVT_SENT_TX2 == ( (EventBits_t)E_NTM_EVT_SENT_TX2 & events ) )
+            {
+                (void)xSemaphoreGive( g_tx2_semphr_hndl );
+
+                /* Enable CAN IRQ factor of the TX2 */
+                hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_TX2 );
+            }
+
+            if( (EventBits_t)E_NTM_EVT_SENT_TX3 == ( (EventBits_t)E_NTM_EVT_SENT_TX3 & events ) )
+            {
+                (void)xSemaphoreGive( g_tx3_semphr_hndl );
+
+                /* Enable CAN IRQ factor of the TX3 */
+                hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_TX3 );
+            }
+
             result = xQueueReceive( g_send_que_hndl, &msg, QUE_WAIT_TICK );
 
             if( pdPASS == result )
             {
-                hwd_set_can_msg( E_CAN_TX_1, msg );
+                if ( pdTRUE == xSemaphoreTake( g_tx1_semphr_hndl, SEMPHR_WAIT_TICK ) )
+                {
+                    hwd_set_can_msg( E_CAN_TX_1, msg );
+                }
+
+                if ( pdTRUE == xSemaphoreTake( g_tx2_semphr_hndl, SEMPHR_WAIT_TICK ) )
+                {
+                    hwd_set_can_msg( E_CAN_TX_2, msg );
+                }
+
+                if ( pdTRUE == xSemaphoreTake( g_tx3_semphr_hndl, SEMPHR_WAIT_TICK ) )
+                {
+                    hwd_set_can_msg( E_CAN_TX_3, msg );
+                }
             }
         }
     }
-
 }
 
 static void irq_handler( const uint8_t fact )
