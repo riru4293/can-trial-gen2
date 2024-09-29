@@ -35,9 +35,11 @@ typedef enum
     E_NTM_EVT_SENT_TX1  = 0x000008U,
     E_NTM_EVT_SENT_TX2  = 0x000010U,
     E_NTM_EVT_SENT_TX3  = 0x000020U,
+    E_NTM_EVT_REQ_TX    = 0x000040U,
     E_NTM_EVT_ALL       = (uint32_t)(
         E_NTM_EVT_RESET | E_NTM_EVT_RECV_RX1 | E_NTM_EVT_RECV_RX2
         | E_NTM_EVT_SENT_TX1 | E_NTM_EVT_SENT_TX2 | E_NTM_EVT_SENT_TX3
+        | E_NTM_EVT_REQ_TX
     )
 } en_ntm_event;
 
@@ -194,7 +196,10 @@ static void task( void* nouse )
                 hwd_enable_can_irq_fact( (uint8_t)E_CAN_IRQ_FACT_TX3 );
             }
 
-            send_can_msg();
+            if( (EventBits_t)E_NTM_EVT_REQ_TX == ( (EventBits_t)E_NTM_EVT_REQ_TX & events ) )
+            {
+                send_can_msg();
+            }
         }
     }
 }
@@ -364,6 +369,7 @@ static void delivery_cbk( const TimerHandle_t hndl )
                 if( pdPASS == result )
                 {
                     p_cnt->is_comp = false;
+                    xEventGroupSetBits( g_evt_hndl, E_NTM_EVT_REQ_TX );
                 }
                 else
                 {

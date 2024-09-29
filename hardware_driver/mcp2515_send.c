@@ -22,6 +22,7 @@
 /* -------------------------------------------------------------------------- */
 static void set_std_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
 static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
+static void write_tx_buff( const en_can_tx can_tx, const size_t n, uint8_t buff[n] );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -90,6 +91,9 @@ en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg* p_can_ms
                 {
                     memcpy( &buff[ E_CAN_BUFF_DATA_1 ], &p_can_msg->data, dlc );
                 }
+
+                /* Request send */
+                write_tx_buff(can_tx, E_CAN_BUFF_QTY, buff);
             }
             else
             {
@@ -126,8 +130,8 @@ static void set_std_can_id( const uint32_t can_id, const size_t n, uint8_t buff[
 
     if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
-        buff[ E_CAN_BUFF_DATA_1 ]  = ( can_id >> C_HDR1_OFFSET );
-        buff[ E_CAN_BUFF_DATA_2 ] |= ( (uint8_t)( can_id << C_HDR2_OFFSET ) & REG_MASK_SIDL_SID );
+        buff[ E_CAN_BUFF_HDR_1 ]  = ( can_id >> C_HDR1_OFFSET );
+        buff[ E_CAN_BUFF_HDR_2 ] |= ( (uint8_t)( can_id << C_HDR2_OFFSET ) & REG_MASK_SIDL_SID );
     }
 }
 
@@ -153,10 +157,62 @@ static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[
 
     if( ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
     {
-        buff[ E_CAN_BUFF_DATA_1 ]  = ( can_id >> C_HDR1_OFFSET );
-        buff[ E_CAN_BUFF_DATA_2 ] |= ( (uint8_t)( can_id >> C_HDR2_EID_OFFSET ) & REG_MASK_SIDL_EID );
-        buff[ E_CAN_BUFF_DATA_2 ] |= ( (uint8_t)( can_id >> C_HDR2_SID_OFFSET ) & REG_MASK_SIDL_SID );
-        buff[ E_CAN_BUFF_DATA_3 ]  = ( can_id >> C_HDR3_OFFSET );
-        buff[ E_CAN_BUFF_DATA_4 ]  = can_id;
+        buff[ E_CAN_BUFF_HDR_1 ]  = ( can_id >> C_HDR1_OFFSET );
+        buff[ E_CAN_BUFF_HDR_2 ] |= ( (uint8_t)( can_id >> C_HDR2_EID_OFFSET ) & REG_MASK_SIDL_EID );
+        buff[ E_CAN_BUFF_HDR_2 ] |= ( (uint8_t)( can_id >> C_HDR2_SID_OFFSET ) & REG_MASK_SIDL_SID );
+        buff[ E_CAN_BUFF_HDR_3 ]  = ( can_id >> C_HDR3_OFFSET );
+        buff[ E_CAN_BUFF_HDR_4 ]  = can_id;
+    }
+}
+
+static void write_tx_buff( const en_can_tx can_tx, const size_t n, uint8_t buff[n] )
+{
+    uint8_t write_cmd = SPI_CMD_INVAL;
+    uint8_t req_cmd = SPI_CMD_INVAL;
+
+    /* Resolve the read command per RX */
+    switch ( can_tx )
+    {
+    case E_CAN_TX_1:
+        write_cmd = SPI_CMD_WRITE_TX_1;
+        req_cmd = SPI_CMD_REQ_TX_1;
+        break;
+    
+    case E_CAN_TX_2:
+        write_cmd = SPI_CMD_WRITE_TX_2;
+        req_cmd = SPI_CMD_REQ_TX_3;
+        break;
+    
+    case E_CAN_TX_3:
+        write_cmd = SPI_CMD_WRITE_TX_3;
+        req_cmd = SPI_CMD_REQ_TX_3;
+        break;
+    
+    default:
+        /* Do nothing */
+        break;
+    }
+
+    if( ( write_cmd != SPI_CMD_INVAL ) && ( req_cmd != SPI_CMD_INVAL )
+        && ( E_CAN_BUFF_QTY == n ) && ( NULL != buff ) )
+    {
+        /* Begin SPI communication */
+        mcp2515_begin_spi();
+
+        /* Write TX buffer */
+        mcp2515_write_spi( write_cmd );
+        mcp2515_write_spi_array( n, buff );
+
+        /* End SPI communication */
+        mcp2515_end_spi();
+
+        /* Begin SPI communication */
+        mcp2515_begin_spi();
+
+        /* Request send */
+        mcp2515_write_spi( req_cmd );
+
+        /* End SPI communication */
+        mcp2515_end_spi();
     }
 }
