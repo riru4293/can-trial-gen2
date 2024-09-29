@@ -22,7 +22,7 @@
 /* -------------------------------------------------------------------------- */
 static void set_std_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
 static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[n] );
-static void write_tx_buff( const en_can_tx can_tx, const size_t n, uint8_t buff[n] );
+static void write_tx_buff( const en_can_tx can_tx, const size_t n, const uint8_t buff[n] );
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -84,7 +84,7 @@ en_errno mcp2515_set_can_msg( const en_can_tx can_tx, const st_can_msg* p_can_ms
             if( E_CAN_DLC_8 >= dlc )
             {
                 /* Set DLC */
-                buff[ E_CAN_BUFF_DATA_1 ] |= ( dlc & REG_MASK_DLC_DLC );
+                buff[ E_CAN_BUFF_HDR_5 ] |= ( dlc & REG_MASK_DLC_DLC );
 
                 /* Set Data */
                 if( E_CAN_DLC_0 < dlc )
@@ -165,7 +165,7 @@ static void set_ext_can_id( const uint32_t can_id, const size_t n, uint8_t buff[
     }
 }
 
-static void write_tx_buff( const en_can_tx can_tx, const size_t n, uint8_t buff[n] )
+static void write_tx_buff( const en_can_tx can_tx, const size_t n, const uint8_t buff[n] )
 {
     uint8_t write_cmd = SPI_CMD_INVAL;
     uint8_t req_cmd = SPI_CMD_INVAL;
