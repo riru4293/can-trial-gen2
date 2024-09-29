@@ -44,6 +44,7 @@ add_subdirectory(free_rtos)         # FreeRTOS
 add_subdirectory(common_definition) # cdf: Common definition
 add_subdirectory(hardware_driver)   # hwd: Operate the hardware
 add_subdirectory(network_manager)   # net: Control Area Network manager
+add_subdirectory(CanTxManager)
 
 add_executable(can_trial ${CMAKE_CURRENT_LIST_DIR}/main.c)
 
