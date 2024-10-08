@@ -17,7 +17,9 @@
 typedef enum
 {
     E_CAN_RX_1,
-    E_CAN_RX_2
+    E_CAN_RX_2,
+    E_CAN_RX_QTY,
+    E_CAN_RX_INVALID
 } en_can_rx;
 
 typedef enum
@@ -25,7 +27,8 @@ typedef enum
     E_CAN_TX_1,
     E_CAN_TX_2,
     E_CAN_TX_3,
-    E_CAN_TX_QTY
+    E_CAN_TX_QTY,
+    E_CAN_TX_INVALID
 } en_can_tx;
 
 typedef enum

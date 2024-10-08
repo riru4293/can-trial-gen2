@@ -56,6 +56,7 @@ target_link_libraries(can_trial
     PRIVATE hardware_driver
     # My module
     PRIVATE network_manager
+    PRIVATE CanTxManager
 )
 
 pico_set_program_name(can_trial "can_trial")

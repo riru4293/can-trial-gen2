@@ -24,8 +24,17 @@
 /* My module */
 #include <ntm_task.h>
 
+
+#include <CanTxManager.h>
+void test(void)
+{
+    CreateCanTxManagerTask();
+}
+
 int main( void )
 {
+    test();
+    // -----
     hwd_init();
 
     ntm_create_task();

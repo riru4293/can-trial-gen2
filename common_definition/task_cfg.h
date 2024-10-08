@@ -15,6 +15,7 @@
 typedef enum
 {
     E_TASK_PRIO_MIN = 1U,
+    E_TASK_PRIO_CAN_TX = 2U,
     E_TASK_PRIO_CAN = 5U,
     E_TASK_PRIO_MAX = 8U
 
